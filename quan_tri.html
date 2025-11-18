@@ -1,0 +1,331 @@
+<div id="page_quan_tri" class="spa-page hidden">
+    <h2 style="margin:0 0 20px; color:#333; font-size:24px;">Quản trị người dùng</h2>
+
+    <button class="btn" onclick="loadUserList()" style="margin-bottom:20px;">Tải danh sách người dùng</button>
+    <div id="userTable" style="margin-top:20px;"></div>
+
+    <div style="margin-top:30px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
+            <h3 style="margin:0; color:#333; font-size:18px; border-bottom:2px solid #1976d2; padding-bottom:8px; display:inline-block;">Thêm / sửa người dùng</h3>
+            <button class="btn btn-success" onclick="showUserForm()" style="padding:8px 16px; font-size:14px;">+ Thêm người dùng</button>
+        </div>
+        <div id="userForm"></div>
+    </div>
+
+    <script>
+        // ============================================
+        // PHÂN QUYỀN CHỈ ÁP DỤNG CHO TRANG QUẢN TRỊ
+        // is_admin chỉ được sử dụng trong trang này
+        // ============================================
+        let editingUserIndex = null;
+        let currentUserIsAdmin = null; // Chỉ áp dụng cho trang quan_tri.html
+        // Giá trị: true = full quyền, false = không quyền, 1 = chỉ thêm, 2 = chỉ sửa/xóa
+
+        // Get current user permissions - chỉ chạy khi ở trang quan_tri
+        function getCurrentUserPermissions() {
+            const storedUser = localStorage.getItem("spa_user");
+            if (storedUser) {
+                try {
+                    const userInfo = JSON.parse(storedUser);
+                    // Get current user's admin status from backend
+                    google.script.run.withSuccessHandler(function(userData) {
+                        if (userData) {
+                            // Lấy giá trị is_admin: true, false, 1, hoặc 2
+                            currentUserIsAdmin = userData.is_admin;
+                            updateButtonsVisibility();
+                            loadUserList();
+                        }
+                    }).withFailureHandler(function(error) {
+                        console.error('Error getting user permissions:', error);
+                        loadUserList();
+                    }).getUserByUsername(userInfo.user);
+                } catch (e) {
+                    console.error('Error parsing user info:', e);
+                    loadUserList();
+                }
+            } else {
+                loadUserList();
+            }
+        }
+
+        // Cập nhật hiển thị nút dựa trên quyền - chỉ áp dụng cho trang quan_tri
+        function updateButtonsVisibility() {
+            const addBtn = document.querySelector('button.btn-success[onclick="showUserForm()"]');
+            if (addBtn) {
+                // Logic phân quyền chỉ cho trang quan_tri:
+                // is_admin = true: hiện nút Thêm
+                // is_admin = 1: hiện nút Thêm
+                if (currentUserIsAdmin === true || currentUserIsAdmin === 1) {
+                    addBtn.style.display = '';
+                } else {
+                    addBtn.style.display = 'none';
+                }
+            }
+        }
+
+        function loadUserList() {
+            google.script.run.withSuccessHandler(function(data) {
+                if (!data || !data.rows) {
+                    document.getElementById('userTable').innerHTML = '<p>Không có dữ liệu</p>';
+                    return;
+                }
+
+                let html = '<table style="width:100%; border-collapse:collapse; background:white; border-radius:8px; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,0.08);">';
+                html += '<thead><tr style="background:#1976d2; color:white;">';
+                html += '<th style="padding:12px; text-align:left; border-bottom:2px solid #1565c0;">User</th>';
+                html += '<th style="padding:12px; text-align:left; border-bottom:2px solid #1565c0;">Password</th>';
+                html += '<th style="padding:12px; text-align:left; border-bottom:2px solid #1565c0;">is_admin</th>';
+                html += '<th style="padding:12px; text-align:left; border-bottom:2px solid #1565c0;">canAdd</th>';
+                html += '<th style="padding:12px; text-align:left; border-bottom:2px solid #1565c0;">canEdit</th>';
+                html += '<th style="padding:12px; text-align:left; border-bottom:2px solid #1565c0;">canDelete</th>';
+                html += '<th style="padding:12px; text-align:left; border-bottom:2px solid #1565c0;">access_tc</th>';
+                html += '<th style="padding:12px; text-align:left; border-bottom:2px solid #1565c0;">access_at</th>';
+                html += '<th style="padding:12px; text-align:left; border-bottom:2px solid #1565c0;">access_bs</th>';
+                html += '<th style="padding:12px; text-align:left; border-bottom:2px solid #1565c0;">access_qt</th>';
+                html += '<th style="padding:12px; text-align:left; border-bottom:2px solid #1565c0;">Thao tác</th>';
+                html += '</tr></thead><tbody>';
+
+                data.rows.forEach((row, idx) => {
+                    const rowIndex = idx + 2; // +2 because header row is 1, and array is 0-indexed
+
+                    html += '<tr style="border-bottom:1px solid #e0e0e0;">';
+                    html += `<td style="padding:10px;">${escapeHtml(row[0] || '')}</td>`;
+                    html += `<td style="padding:10px;">${escapeHtml(row[1] || '')}</td>`;
+                    // Hiển thị is_admin: true, false, 1, hoặc 2
+                    let isAdminDisplay = 'false';
+                    if (row[2] === true) {
+                        isAdminDisplay = 'true';
+                    } else if (row[2] === 1) {
+                        isAdminDisplay = '1';
+                    } else if (row[2] === 2) {
+                        isAdminDisplay = '2';
+                    }
+                    html += `<td style="padding:10px;">${isAdminDisplay}</td>`;
+                    html += `<td style="padding:10px;">${row[3] === true ? 'true' : row[3] === 1 ? '1' : 'false'}</td>`;
+                    html += `<td style="padding:10px;">${row[4] === true ? 'true' : row[4] === 2 ? '2' : 'false'}</td>`;
+                    html += `<td style="padding:10px;">${row[5] ? 'true' : 'false'}</td>`;
+                    html += `<td style="padding:10px;">${row[6] ? 'true' : 'false'}</td>`;
+                    html += `<td style="padding:10px;">${row[7] ? 'true' : 'false'}</td>`;
+                    html += `<td style="padding:10px;">${row[8] ? 'true' : 'false'}</td>`;
+                    html += `<td style="padding:10px;">${row[9] ? 'true' : 'false'}</td>`;
+
+                    // Check permissions for action buttons - chỉ áp dụng cho trang quan_tri
+                    // Logic phân quyền:
+                    // is_admin = true: hiện tất cả nút (Sửa, Xóa)
+                    // is_admin = false: không có quyền
+                    // is_admin = 1: không hiện nút Sửa/Xóa (chỉ có nút Thêm)
+                    // is_admin = 2: chỉ hiện nút Sửa (btn) và Xóa (btn-danger)
+                    let actionButtons = '';
+                    const canShowEdit = currentUserIsAdmin === true || currentUserIsAdmin === 2;
+                    const canShowDelete = currentUserIsAdmin === true || currentUserIsAdmin === 2;
+
+                    if (canShowEdit || canShowDelete) {
+                        actionButtons = '<td style="padding:10px;">';
+                        if (canShowEdit) {
+                            actionButtons += `<button class="btn" style="padding:6px 12px; font-size:13px; margin-right:5px;" onclick="editUser(${rowIndex})">Sửa</button>`;
+                        }
+                        if (canShowDelete) {
+                            actionButtons += `<button class="btn btn-danger" style="padding:6px 12px; font-size:13px;" onclick="deleteUser(${rowIndex})">Xóa</button>`;
+                        }
+                        actionButtons += '</td>';
+                    } else {
+                        actionButtons = '<td style="padding:10px;">-</td>';
+                    }
+                    html += actionButtons;
+                    html += '</tr>';
+                });
+
+                html += '</tbody></table>';
+                document.getElementById('userTable').innerHTML = html;
+            }).withFailureHandler(function(error) {
+                alert('Lỗi: ' + error.toString());
+            }).getUsers();
+        }
+
+        function showUserForm() {
+            const formHtml = `
+                <div style="background:white; padding:20px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.08); margin-top:20px;">
+                    <h4 style="margin:0 0 15px; color:#333; font-size:16px; border-bottom:2px solid #1976d2; padding-bottom:8px;">Thêm người dùng mới</h4>
+                    <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:10px;">
+                        <div style="display:flex; align-items:center; gap:8px;"><label style="min-width:90px; color:#555; font-size:13px; font-weight:500;">User:</label><input type="text" id="f_user" style="flex:1; padding:8px; border:1px solid #e0e0e0; border-radius:6px; font-size:13px;"></div>
+                        <div style="display:flex; align-items:center; gap:8px;"><label style="min-width:90px; color:#555; font-size:13px; font-weight:500;">Pass:</label><input type="text" id="f_pass" style="flex:1; padding:8px; border:1px solid #e0e0e0; border-radius:6px; font-size:13px;"></div>
+                        <div style="display:flex; align-items:center; gap:8px;"><label style="min-width:90px; color:#555; font-size:13px; font-weight:500;">is_admin:</label><input type="text" id="f_is_admin" placeholder="true/false" style="flex:1; padding:8px; border:1px solid #e0e0e0; border-radius:6px; font-size:13px;"></div>
+                        <div style="display:flex; align-items:center; gap:8px;"><label style="min-width:90px; color:#555; font-size:13px; font-weight:500;">canAdd:</label><input type="text" id="f_canAdd" placeholder="true/false" style="flex:1; padding:8px; border:1px solid #e0e0e0; border-radius:6px; font-size:13px;"></div>
+                        <div style="display:flex; align-items:center; gap:8px;"><label style="min-width:90px; color:#555; font-size:13px; font-weight:500;">canEdit:</label><input type="text" id="f_canEdit" placeholder="true/false" style="flex:1; padding:8px; border:1px solid #e0e0e0; border-radius:6px; font-size:13px;"></div>
+                        <div style="display:flex; align-items:center; gap:8px;"><label style="min-width:90px; color:#555; font-size:13px; font-weight:500;">canDelete:</label><input type="text" id="f_canDelete" placeholder="true/false" style="flex:1; padding:8px; border:1px solid #e0e0e0; border-radius:6px; font-size:13px;"></div>
+                        <div style="display:flex; align-items:center; gap:8px;"><label style="min-width:90px; color:#555; font-size:13px; font-weight:500;">access_tc:</label><input type="text" id="f_access_tc" placeholder="true/false" style="flex:1; padding:8px; border:1px solid #e0e0e0; border-radius:6px; font-size:13px;"></div>
+                        <div style="display:flex; align-items:center; gap:8px;"><label style="min-width:90px; color:#555; font-size:13px; font-weight:500;">access_at:</label><input type="text" id="f_access_at" placeholder="true/false" style="flex:1; padding:8px; border:1px solid #e0e0e0; border-radius:6px; font-size:13px;"></div>
+                        <div style="display:flex; align-items:center; gap:8px;"><label style="min-width:90px; color:#555; font-size:13px; font-weight:500;">access_bs:</label><input type="text" id="f_access_bs" placeholder="true/false" style="flex:1; padding:8px; border:1px solid #e0e0e0; border-radius:6px; font-size:13px;"></div>
+                        <div style="display:flex; align-items:center; gap:8px;"><label style="min-width:90px; color:#555; font-size:13px; font-weight:500;">access_qt:</label><input type="text" id="f_access_qt" placeholder="true/false" style="flex:1; padding:8px; border:1px solid #e0e0e0; border-radius:6px; font-size:13px;"></div>
+                    </div>
+                    <div style="margin-top:15px; display:flex; gap:10px;">
+                        <button class="btn btn-success" onclick="saveUser()" style="padding:10px 20px;">Lưu</button>
+                        <button class="btn btn-secondary" onclick="resetUserForm()" style="padding:10px 20px;">Đặt lại</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('userForm').innerHTML = formHtml;
+            editingUserIndex = null;
+        }
+
+        function editUser(index) {
+            // Đảm bảo form đã được tạo và hiển thị
+            const formDiv = document.getElementById('userForm');
+            if (!formDiv || formDiv.innerHTML === '') {
+                showUserForm();
+            }
+            formDiv.style.display = '';
+
+            google.script.run.withSuccessHandler(function(user) {
+                if (!user) {
+                    alert('Không tìm thấy người dùng');
+                    return;
+                }
+
+                editingUserIndex = index;
+
+                // Đảm bảo form đã được tạo trước khi điền dữ liệu
+                if (!document.getElementById('f_user')) {
+                    showUserForm();
+                }
+
+                document.getElementById('f_user').value = user.user || '';
+                document.getElementById('f_pass').value = user.password || '';
+
+                // Hiển thị is_admin: true, false, 1, hoặc 2
+                let isAdminValue = 'false';
+                if (user.is_admin === true) {
+                    isAdminValue = 'true';
+                } else if (user.is_admin === 1) {
+                    isAdminValue = '1';
+                } else if (user.is_admin === 2) {
+                    isAdminValue = '2';
+                }
+                document.getElementById('f_is_admin').value = isAdminValue;
+
+                document.getElementById('f_canAdd').value = user.canAdd ? 'true' : 'false';
+                document.getElementById('f_canEdit').value = user.canEdit ? 'true' : 'false';
+                document.getElementById('f_canDelete').value = user.canDelete ? 'true' : 'false';
+                document.getElementById('f_access_tc').value = user.trang_chu ? 'true' : 'false';
+                document.getElementById('f_access_at').value = user.app_taive ? 'true' : 'false';
+                document.getElementById('f_access_bs').value = user.bo_sung ? 'true' : 'false';
+                document.getElementById('f_access_qt').value = user.quan_tri ? 'true' : 'false';
+
+                document.querySelector('#userForm h4').textContent = 'Sửa người dùng';
+
+                // Scroll to form
+                formDiv.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }).withFailureHandler(function(error) {
+                alert('Lỗi: ' + error.toString());
+            }).getUserByIndex(index);
+        }
+
+        function saveUser() {
+            const user = document.getElementById('f_user').value.trim();
+            const pass = document.getElementById('f_pass').value.trim();
+            if (!user || !pass) {
+                alert('Vui lòng nhập User và Password');
+                return;
+            }
+
+            const isAdmin = document.getElementById('f_is_admin').value.trim().toLowerCase() === 'true';
+            const canAdd = document.getElementById('f_canAdd').value.trim().toLowerCase() === 'true';
+            const canEdit = document.getElementById('f_canEdit').value.trim().toLowerCase() === 'true';
+            const canDelete = document.getElementById('f_canDelete').value.trim().toLowerCase() === 'true';
+            const accessTc = document.getElementById('f_access_tc').value.trim().toLowerCase() === 'true';
+            const accessAt = document.getElementById('f_access_at').value.trim().toLowerCase() === 'true';
+            const accessBs = document.getElementById('f_access_bs').value.trim().toLowerCase() === 'true';
+            const accessQt = document.getElementById('f_access_qt').value.trim().toLowerCase() === 'true';
+
+            const userData = {
+                user: user,
+                password: pass,
+                is_admin: isAdmin,
+                canAdd: canAdd,
+                canEdit: canEdit,
+                canDelete: canDelete,
+                trang_chu: accessTc,
+                app_taive: accessAt,
+                bo_sung: accessBs,
+                quan_tri: accessQt
+            };
+
+            if (editingUserIndex) {
+                google.script.run.withSuccessHandler(function() {
+                    alert('Đã cập nhật người dùng!');
+                    loadUserList();
+                    resetUserForm();
+                }).withFailureHandler(function(error) {
+                    alert('Lỗi: ' + error.toString());
+                }).updateUser(editingUserIndex, userData);
+            } else {
+                google.script.run.withSuccessHandler(function() {
+                    alert('Đã thêm người dùng!');
+                    loadUserList();
+                    resetUserForm();
+                }).withFailureHandler(function(error) {
+                    alert('Lỗi: ' + error.toString());
+                }).addUser(userData);
+            }
+        }
+
+        function resetUserForm() {
+            document.getElementById('f_user').value = '';
+            document.getElementById('f_pass').value = '';
+            document.getElementById('f_is_admin').value = '';
+            document.getElementById('f_canAdd').value = '';
+            document.getElementById('f_canEdit').value = '';
+            document.getElementById('f_canDelete').value = '';
+            document.getElementById('f_access_tc').value = '';
+            document.getElementById('f_access_at').value = '';
+            document.getElementById('f_access_bs').value = '';
+            document.getElementById('f_access_qt').value = '';
+            editingUserIndex = null;
+            document.querySelector('#userForm h4').textContent = 'Thêm người dùng mới';
+        }
+
+        function deleteUser(index) {
+            if (!confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
+                return;
+            }
+
+            google.script.run.withSuccessHandler(function() {
+                alert('Đã xóa người dùng!');
+                loadUserList();
+            }).withFailureHandler(function(error) {
+                alert('Lỗi: ' + error.toString());
+            }).deleteUser(index);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Hide form by default, only show when button is clicked
+        document.getElementById('userForm').style.display = 'none';
+
+        // Override showUserForm to toggle visibility
+        const originalShowUserForm = showUserForm;
+        showUserForm = function() {
+            const formDiv = document.getElementById('userForm');
+            if (formDiv.style.display === 'none' || formDiv.innerHTML === '') {
+                originalShowUserForm();
+                formDiv.style.display = '';
+            } else {
+                formDiv.style.display = 'none';
+            }
+        };
+
+        // Load user permissions when page opens
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', getCurrentUserPermissions);
+        } else {
+            getCurrentUserPermissions();
+        }
+    </script>
+</div>

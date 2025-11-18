@@ -1,0 +1,4061 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background: #f0f2f5;
+        }
+
+        /* LOGIN UI */
+        #loginPanel {
+            position: absolute;
+            width: 400px;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 80px;
+        }
+
+        .login-container {
+            background: white;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .login-container h3 {
+            margin: 0 0 25px;
+            color: #333;
+            font-size: 24px;
+        }
+
+        .login-container input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .login-container input:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+
+        /* APP LAYOUT */
+        .app-shell {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #263238 0%, #1a2528 100%);
+            color: white;
+            padding: 25px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar h3 {
+            margin: 0 0 25px;
+            font-size: 20px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 15px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar li {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            transition: all 0.3s;
+            font-size: 15px;
+        }
+
+        .sidebar li:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow: auto;
+            background: #f5f7fa;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* FORM STYLES */
+        .form-container {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .form-container h2 {
+            margin: 0 0 15px;
+            color: #333;
+            font-size: 22px;
+            border-bottom: 2px solid #1976d2;
+            padding-bottom: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #1976d2;
+            box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 60px;
+            resize: vertical;
+        }
+
+        /* HASHTAG BUTTONS */
+        .hashtag-btn {
+            padding: 4px 10px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 16px;
+            background: #f5f5f5;
+            color: #666;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .hashtag-btn:hover {
+            background: #e3f2fd;
+            border-color: #1976d2;
+            color: #1976d2;
+            transform: translateY(-1px);
+        }
+
+        .hashtag-btn.hashtag-add {
+            background: transparent;
+            border: 1.5px dashed #ccc;
+            color: #999;
+        }
+
+        .hashtag-btn.hashtag-add:hover {
+            background: #f0f0f0;
+            border-color: #1976d2;
+            color: #1976d2;
+        }
+
+        .file-upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+            background: #fafafa;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .file-upload-area:hover {
+            border-color: #1976d2;
+            background: #f0f7ff;
+        }
+
+        .file-upload-area.dragover {
+            border-color: #1976d2;
+            background: #e3f2fd;
+        }
+
+        .file-preview {
+            margin-top: 8px;
+            display: none;
+        }
+
+        .file-preview img {
+            max-width: 120px;
+            max-height: 120px;
+            border-radius: 6px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn {
+            background: #1976d2;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            background: #1565c0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-danger {
+            background: #d32f2f;
+        }
+
+        .btn-danger:hover {
+            background: #c62828;
+        }
+
+        .btn-success {
+            background: #388e3c;
+        }
+
+        .btn-success:hover {
+            background: #2e7d32;
+        }
+
+        .btn-secondary {
+            background: #757575;
+        }
+
+        .btn-secondary:hover {
+            background: #616161;
+        }
+
+        /* NOTES TABLE */
+        .table-wrapper {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            margin-top: 20px;
+        }
+
+        .table-notes {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+            background: white;
+        }
+
+        .table-notes th,
+        .table-notes td {
+            border-bottom: 1px solid #e0e0e0;
+            padding: 15px;
+            font-size: 14px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .table-notes th {
+            background: #f5f5f5;
+            font-weight: 600;
+            color: #333;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .table-notes tr:hover {
+            background: #f8f9fa;
+        }
+
+        .table-notes tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Edit mode styling */
+        .table-notes td.editing-cell {
+            padding: 10px;
+            background: #fafafa;
+        }
+
+        .table-notes td.editing-cell input,
+        .table-notes td.editing-cell textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #1976d2;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: inherit;
+            background: white;
+            transition: all 0.3s;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .table-notes td.editing-cell input {
+            min-height: 44px;
+            line-height: 1.5;
+        }
+
+        .table-notes td.editing-cell textarea {
+            min-height: 100px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        .table-notes td.editing-cell input:focus,
+        .table-notes td.editing-cell textarea:focus {
+            border-color: #1565c0;
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+            background: #fff;
+        }
+
+        .table-notes td.editing-cell input:hover,
+        .table-notes td.editing-cell textarea:hover {
+            border-color: #42a5f5;
+        }
+
+        /* IMAGE COLUMN */
+        .img-cell {
+            text-align: center;
+            width: 120px;
+        }
+
+        .img-thumbnail {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid #e0e0e0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .img-thumbnail:hover {
+            transform: scale(1.2);
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border-color: #1976d2;
+        }
+
+        .img-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .img-modal.fullscreen {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .img-modal.fullscreen .img-modal-content {
+            width: 100%;
+            max-width: 100%;
+            max-height: 100%;
+            height: 100vh;
+            border-radius: 0;
+            padding: 10px;
+            gap: 10px;
+            background: white;
+        }
+
+        .img-modal.fullscreen .img-modal-main-view {
+            max-height: calc(100vh - 20px);
+            min-height: calc(100vh - 20px);
+            height: calc(100vh - 20px);
+            border-radius: 8px;
+            margin: 0;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .img-modal.fullscreen .img-modal-thumbnails {
+            display: flex;
+            max-height: calc(100vh - 20px);
+            height: calc(100vh - 20px);
+        }
+
+        .img-modal.fullscreen .img-modal-controls {
+            top: 10px;
+            right: 10px;
+        }
+
+        .img-modal.fullscreen .img-modal-zoom-controls {
+            top: 10px;
+            left: 10px;
+        }
+
+        .img-modal.fullscreen .img-modal-main-view img {
+            max-width: calc(100vw - 180px);
+            max-height: calc(100vh - 20px);
+            width: auto;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .img-modal-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+            width: 1200px;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 20px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .img-modal-main-view {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 0;
+            min-height: 500px;
+            max-height: 600px;
+            position: relative;
+            overflow: hidden;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .img-modal img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            cursor: move;
+            user-select: none;
+            object-fit: contain;
+        }
+
+        .img-modal-thumbnails {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 15px;
+            overflow-x: hidden;
+            overflow-y: auto;
+            width: 150px;
+            min-width: 150px;
+            max-height: 600px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .img-modal-thumbnails::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .img-modal-thumbnails::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .img-modal-thumbnails::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .img-modal-thumbnail-wrapper {
+            position: relative;
+            display: block;
+            margin: 0;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .img-modal-thumbnail {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s;
+            opacity: 0.7;
+            background: white;
+        }
+
+        .img-modal-thumbnail:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .img-modal-thumbnail.active {
+            border-color: #1976d2;
+            opacity: 1;
+            box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
+        }
+
+        .img-modal-thumbnail-delete {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 24px;
+            height: 24px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+            transition: all 0.3s;
+        }
+
+        .img-modal-thumbnail-delete:hover {
+            background: #d32f2f;
+            transform: scale(1.1);
+        }
+
+        .img-modal-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1001;
+        }
+
+        .img-modal-btn {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #e0e0e0;
+            padding: 6px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            color: #333;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .img-modal-btn svg {
+            display: block;
+        }
+
+        .img-modal-btn:hover {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .img-modal-btn-add {
+            background: #f5f5f5;
+            border: 2px dashed #ccc;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 20px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            padding: 0;
+            width: 50px;
+            height: 50px;
+        }
+
+        .img-modal-btn-add:hover {
+            background: #e3f2fd;
+            border-color: #1976d2;
+            color: #1976d2;
+            transform: translateY(-1px);
+        }
+
+        .img-modal-btn-add svg {
+            display: block;
+        }
+
+        .img-modal-btn-danger {
+            background: #d1d2e7;
+        }
+
+        .img-modal-btn-danger:hover {
+            background: #d2d8eb;
+        }
+
+        .img-modal-btn-success {
+            background: #d1d2e7;
+        }
+
+        .img-modal-btn-success:hover {
+            background: #cddeec;
+        }
+
+        .img-modal-zoom-controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px 12px;
+            border-radius: 25px;
+            z-index: 1001;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            border: 1px solid #e0e0e0;
+        }
+
+        .img-modal-zoom-btn {
+            background: white;
+            border: 1px solid #e0e0e0;
+            padding: 6px 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .img-modal-zoom-btn svg {
+            display: block;
+        }
+
+        .img-modal-zoom-btn:hover {
+            background: #f5f5f5;
+            border-color: #1976d2;
+            color: #1976d2;
+            transform: scale(1.1);
+        }
+
+        .img-modal-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1002;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .img-modal-nav-btn svg {
+            display: block;
+        }
+
+        .img-modal-nav-btn:hover {
+            background: white;
+            border-color: #1976d2;
+            color: #1976d2;
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .img-modal-nav-prev {
+            left: 20px;
+        }
+
+        .img-modal-nav-next {
+            right: 20px;
+        }
+
+        .img-modal-nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .img-modal-nav-btn:disabled:hover {
+            transform: translateY(-50%);
+        }
+
+
+        .table-notes tbody tr {
+            cursor: pointer;
+            transition: background-color 0.16s ease;
+        }
+
+        .table-notes tbody tr:hover {
+            background: rgba(37, 99, 235, 0.035);
+        }
+
+        @media (max-width: 1080px) {}
+
+        /* ACTION BUTTONS */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: 1.5px solid;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+            font-weight: 500;
+            background: transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .action-btn svg {
+            width: 16px;
+            height: 16px;
+            display: block;
+        }
+
+        .btn-edit {
+            border-color: #1976d2;
+            color: #1976d2;
+            background: transparent;
+        }
+
+        .btn-edit:hover {
+            background: rgba(25, 118, 210, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-delete {
+            border-color: #f44336;
+            color: #f44336;
+            background: transparent;
+        }
+
+        .btn-delete:hover {
+            background: rgba(244, 67, 54, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-cancel {
+            border-color: #757575;
+            color: #757575;
+            background: transparent;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(117, 117, 117, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 15px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        /* LOADING */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1976d2;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- LOGIN -->
+    <div id="loginPanel">
+        <div class="login-container">
+            <h3>Đăng nhập</h3>
+            <input id="lg_user" placeholder="Tài khoản">
+            <input id="lg_pass" type="password" placeholder="Mật khẩu">
+            <button class="btn" onclick="spaLogin()">Đăng nhập</button>
+        </div>
+    </div>
+
+    <!-- APP -->
+    <div id="appShell" class="hidden app-shell">
+        <aside class="sidebar">
+            <h3>MENU</h3>
+            <ul>
+                <li data-page="trang_chu" onclick="openPage('trang_chu')">Trang chủ</li>
+                <li data-page="app_taive" onclick="openPage('app_taive')">App tải về</li>
+                <li data-page="bo_sung" onclick="openPage('bo_sung')">Bổ sung</li>
+                <li data-page="quan_tri" onclick="openPage('quan_tri')">Quản trị</li>
+            </ul>
+            <div style="margin-top:20px;">
+                <span id="userLabel"></span><br>
+                <a href="#" onclick="logout()" style="color:white;">Đăng xuất</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+
+            <!-- PAGE TRANG CHU -->
+            <div id="page_trang_chu" class="spa-page">
+                <div class="form-container">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <h2 id="formTitle" style="margin:0; color:#333;">Thêm Note</h2>
+                        <button class="btn btn-secondary" onclick="resetForm()" style="padding:6px 12px; font-size:12px;">
+                            🔄 Làm mới
+                        </button>
+                    </div>
+                    <input type="hidden" id="editNoteId" value="">
+
+                    <!-- Form Grid Layout -->
+                    <div style="display:grid; grid-template-columns: 4fr 3fr 3fr; gap:10px; margin-bottom:10px;">
+                        <!-- Lĩnh vực (2/10) -->
+                        <div class="form-group" style="margin:0;">
+                            <label>Lĩnh vực</label>
+                            <input id="f_lv" class="txt" placeholder="Nhập lĩnh vực">
+                            <div id="hashtagLinhVuc" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;">
+                                <button type="button" class="hashtag-btn" onclick="setLinhVuc('quản trị doanh nghiệp')"># quản trị doanh nghiệp</button>
+                                <button type="button" class="hashtag-btn" onclick="setLinhVuc('Edu')"># Edu</button>
+                                <button type="button" class="hashtag-btn" onclick="setLinhVuc('Đất Đai')"># Đất đai</button>
+                                <button type="button" class="hashtag-btn" onclick="setLinhVuc('khác')"># khác</button>
+                                <button type="button" class="hashtag-btn hashtag-add" onclick="addHashtag('linhVuc')" title="Thêm hashtag mới">+ Thêm</button>
+                            </div>
+                        </div>
+                        <!-- Địa bàn (3/10) -->
+                        <div class="form-group" style="margin:0;">
+                            <label>Địa bàn</label>
+                            <input id="f_db" placeholder="Nhập địa bàn">
+                            <div id="hashtagDiaBan" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;">
+                                <button type="button" class="hashtag-btn" onclick="setDiaBan('bình phước')"># bình phước</button>
+                                <button type="button" class="hashtag-btn" onclick="setDiaBan('đồng nai')"># đồng nai</button>
+                                <button type="button" class="hashtag-btn hashtag-add" onclick="addHashtag('diaBan')" title="Thêm hashtag mới">+ Thêm</button>
+                            </div>
+                        </div>
+                        <!-- Tiêu đề (5/10) -->
+                        <div class="form-group" style="margin:0;">
+                            <label>Tiêu đề / Vấn đề</label>
+                            <input id="f_td" placeholder="Nhập tiêu đề">
+                        </div>
+                    </div>
+
+                    <!-- Chi tiết vấn đề (5/10) -->
+                    <div class="form-group" style="margin-bottom:10px;">
+                        <label>Chi tiết vấn đề</label>
+                        <textarea id="f_ct" placeholder="Nhập chi tiết vấn đề" style="min-height:80px;"></textarea>
+                    </div>
+
+                    <!-- Hướng giải quyết (5/10) -->
+                    <div class="form-group" style="margin-bottom:10px;">
+                        <label>Hướng giải quyết</label>
+                        <textarea id="f_hgq" placeholder="Nhập hướng giải quyết" style="min-height:80px;"></textarea>
+                    </div>
+
+                    <!-- Góp ý hướng giải quyết -->
+                    <div class="form-group" style="margin-bottom:10px;">
+                        <label>Góp ý hướng giải quyết</label>
+                        <textarea id="f_gy" placeholder="Nhập góp ý" style="min-height:60px;"></textarea>
+                    </div>
+
+                    <!-- Upload và Lưu Note cùng hàng -->
+                    <div class="form-group" style="margin-bottom:10px;">
+                        <label>Upload file / hình ảnh (hoặc dán hình ảnh từ clipboard)</label>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr auto; gap:10px; align-items:start;">
+                            <!-- Image Upload Area (Left) -->
+                            <div>
+                                <div class="file-upload-area" id="imageUploadArea" onclick="document.getElementById('f_images').click()" tabindex="0">
+                                    <p style="margin:0; color:#666; font-size:11px; line-height:1.4; display:flex; align-items:center; justify-content:center; gap:6px; flex-direction:column;">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#666;">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                            <polyline points="21 15 16 10 5 21"></polyline>
+                                        </svg>
+                                        <span>Kéo thả ảnh hoặc click<br>Nhiều ảnh | Ctrl+V để dán</span>
+                                    </p>
+                                    <input type="file" id="f_images" accept="image/*" multiple style="display:none;">
+                                </div>
+                                <div class="file-preview" id="imagePreview">
+                                    <div id="imagePreviewList" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;"></div>
+                                    <button class="btn btn-secondary" onclick="clearImagePreview()" style="margin-top:8px; padding:4px 10px; font-size:11px;">Xóa tất cả ảnh</button>
+                                </div>
+                            </div>
+                            <!-- File Upload Area (Right) -->
+                            <div>
+                                <div class="file-upload-area" id="fileUploadArea" onclick="document.getElementById('f_file').click()">
+                                    <p style="margin:0; color:#666; font-size:11px; line-height:1.4; display:flex; align-items:center; justify-content:center; gap:6px; flex-direction:column;">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#666;">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                            <polyline points="17 8 12 3 7 8"></polyline>
+                                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                                        </svg>
+                                        <span>Kéo thả file hoặc click</span>
+                                    </p>
+                                    <input type="file" id="f_file" multiple style="display:none;">
+                                </div>
+                                <div class="file-preview" id="filePreview">
+                                    <div id="filePreviewList" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;"></div>
+                                    <button class="btn btn-secondary" onclick="clearFilePreview()" style="margin-top:8px; padding:4px 10px; font-size:11px;">Xóa tất cả file</button>
+                                </div>
+                            </div>
+                            <!-- Lưu Note Button -->
+                            <div style="display:flex; flex-direction:column; gap:8px; align-items:stretch;">
+                                <button class="btn" onclick="saveNoteUI()" id="saveBtn" style="padding:12px 24px; font-size:14px; white-space:nowrap;">Lưu Note</button>
+                                <button class="btn btn-secondary" onclick="cancelEdit()" id="cancelBtn" style="display:none; padding:12px 24px; font-size:14px; white-space:nowrap;">Hủy</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; gap:10px; flex-wrap:wrap;">
+                        <h2 style="margin:0; color:#333;">Danh sách Notes</h2>
+                        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                            <div style="display:flex; gap:5px; align-items:center;">
+                                <input type="text" id="searchInput" placeholder="Tìm kiếm..." style="padding:8px 12px; border:2px solid #e0e0e0; border-radius:8px; font-size:14px; min-width:200px;" onkeypress="if(event.key==='Enter') searchNotes()">
+                                <button class="btn btn-secondary" onclick="searchNotes()" style="padding:8px 16px; white-space:nowrap;">
+                                    🔍 Tìm kiếm
+                                </button>
+                            </div>
+                            <div style="display:flex; gap:5px; align-items:center;">
+                                <input type="date" id="filterDateFrom" style="padding:8px; border:2px solid #e0e0e0; border-radius:8px; font-size:14px;">
+                                <span style="color:#666;">đến</span>
+                                <input type="date" id="filterDateTo" style="padding:8px; border:2px solid #e0e0e0; border-radius:8px; font-size:14px;">
+                                <button class="btn btn-secondary" onclick="filterByDate()" style="padding:8px 16px; white-space:nowrap;">
+                                    ⌨︎ Lọc
+                                </button>
+                            </div>
+                            <button class="btn btn-secondary" onclick="loadNotes(currentPage)" style="padding:8px 16px; white-space:nowrap;">
+                                ♾️ Tải lại
+                            </button>
+                        </div>
+                    </div>
+                    <div id="notesContainer">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Đang tải...</p>
+                        </div>
+                    </div>
+                    <!-- Pagination Controls -->
+                    <div id="paginationContainer" style="display:none; margin-top:20px; padding:15px; background:white; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.08);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <label style="color:#666; font-size:14px;">Số dòng:</label>
+                                <select id="pageSizeSelect" onchange="changePageSize()" style="padding:8px 12px; border:2px solid #e0e0e0; border-radius:8px; font-size:14px; cursor:pointer;">
+                                    <option value="10">10</option>
+                                    <option value="20">20</option>
+                                    <option value="50">50</option>
+                                    <option value="200">200</option>
+                                </select>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:10px; color:#666; font-size:14px;">
+                                <span id="pageInfo">1 - 10 của 0</span>
+                            </div>
+                            <div style="display:flex; gap:5px;">
+                                <button class="btn btn-secondary" onclick="goToFirstPage()" id="btnFirst" style="padding:8px 12px; min-width:40px;" title="Trang đầu">««</button>
+                                <button class="btn btn-secondary" onclick="goToPrevPage()" id="btnPrev" style="padding:8px 12px; min-width:40px;" title="Trang trước">«</button>
+                                <button class="btn btn-secondary" onclick="goToNextPage()" id="btnNext" style="padding:8px 12px; min-width:40px;" title="Trang sau">»</button>
+                                <button class="btn btn-secondary" onclick="goToLastPage()" id="btnLast" style="padding:8px 12px; min-width:40px;" title="Trang cuối">»»</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- IMAGE MODAL WITH ZOOM AND EDIT -->
+            <div class="img-modal" id="imgModal" onclick="if(event.target === this) closeImageModal()" tabindex="0">
+                <div class="img-modal-content">
+                    <div class="img-modal-controls">
+                        <button class="img-modal-btn-add" onclick="event.stopPropagation(); addImageToModal()" title="Thêm ảnh (hoặc Ctrl+V để dán)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </button>
+                        <button class="img-modal-btn img-modal-btn-danger" onclick="event.stopPropagation(); deleteImageFromModal()" title="Xóa ảnh hiện tại">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                <line x1="10" y1="11" x2="10" y2="17"></line>
+                                <line x1="14" y1="11" x2="14" y2="17"></line>
+                            </svg>
+                        </button>
+                        <button class="img-modal-btn img-modal-btn-success" onclick="event.stopPropagation(); saveImageChanges()" title="Lưu thay đổi">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                <polyline points="7 3 7 8 15 8"></polyline>
+                            </svg>
+                        </button>
+                        <button class="img-modal-btn" onclick="event.stopPropagation(); closeImageModal()" title="Đóng">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="img-modal-main-view">
+                        <div class="img-modal-zoom-controls">
+                            <button class="img-modal-zoom-btn" onclick="event.stopPropagation(); toggleFullscreen()" title="Toàn màn hình">
+                                <svg id="fullscreenIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                                </svg>
+                            </button>
+                            <button class="img-modal-zoom-btn" onclick="event.stopPropagation(); zoomOut()" title="Thu nhỏ">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    <line x1="8" y1="11" x2="14" y2="11"></line>
+                                </svg>
+                            </button>
+                            <button class="img-modal-zoom-btn" onclick="event.stopPropagation(); zoomIn()" title="Phóng to">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    <line x1="11" y1="8" x2="11" y2="14"></line>
+                                    <line x1="8" y1="11" x2="14" y2="11"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <button class="img-modal-nav-btn img-modal-nav-prev" onclick="event.stopPropagation(); showPrevImage()" title="Ảnh trước">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="15 18 9 12 15 6"></polyline>
+                            </svg>
+                        </button>
+                        <img id="modalImg" src="" alt="Full size" onmousedown="event.stopPropagation(); startDrag(event)" onmousemove="event.stopPropagation(); drag(event)" onmouseup="event.stopPropagation(); stopDrag()" onmouseleave="event.stopPropagation(); stopDrag()" onwheel="event.stopPropagation(); handleWheel(event)" onerror="handleModalImageError(this)">
+                        <button class="img-modal-nav-btn img-modal-nav-next" onclick="event.stopPropagation(); showNextImage()" title="Ảnh sau">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="img-modal-thumbnails" id="imgModalThumbnails">
+                        <!-- Thumbnails will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- include other pages -->
+            <?!= include('app_taive.html') ?>
+            <?!= include('bo_sung.html') ?>
+            <?!= include('quan_tri.html') ?>
+
+        </main>
+    </div>
+    <script>
+        window.onerror = function(msg, url, line, col, error) {
+            alert("Lỗi JS: " + msg + "\nTại: " + line + ":" + col);
+        };
+    </script>
+    <script>
+        let CURRENT_USER = null;
+        let USER_PERMISSIONS = {
+            canAdd: false,
+            canEdit: false,
+            canDelete: false,
+            access: {
+                trang_chu: true,
+                app_taive: false,
+                bo_sung: false,
+                quan_tri: false
+            }
+        };
+
+        /* LOGIN */
+        function spaLogin() {
+            google.script.run.withSuccessHandler(function(res) {
+                if (!res.success) {
+                    alert(res.message);
+                    return;
+                }
+
+                CURRENT_USER = res.info.user;
+                USER_PERMISSIONS = {
+                    canAdd: res.info.canAdd || false,
+                    canEdit: res.info.canEdit || false,
+                    canDelete: res.info.canDelete || false,
+                    access: res.info.access || {
+                        trang_chu: true,
+                        app_taive: false,
+                        bo_sung: false,
+                        quan_tri: false
+                    }
+                };
+                localStorage.setItem("spa_user", JSON.stringify(res.info));
+
+                loginPanel.classList.add("hidden");
+                appShell.classList.remove("hidden");
+                userLabel.textContent = CURRENT_USER;
+
+                // Update UI based on permissions
+                updateUIByPermissions();
+                updateSidebarMenu();
+
+                openPage("trang_chu");
+
+            }).login(lg_user.value.trim(), lg_pass.value.trim(), "trang_chu");
+        }
+
+        /* SPA */
+        function openPage(p) {
+            // Check access permission (trang_chu is always accessible)
+            if (p !== 'trang_chu') {
+                const hasAccess = USER_PERMISSIONS.access && USER_PERMISSIONS.access[p] === true;
+                if (!hasAccess) {
+                    alert('Bạn không có quyền truy cập trang này!');
+                    // Redirect to trang_chu if trying to access unauthorized page
+                    const trangChuPage = document.getElementById("page_trang_chu");
+                    if (trangChuPage) {
+                        document.querySelectorAll(".spa-page").forEach(e => e.classList.add("hidden"));
+                        trangChuPage.classList.remove("hidden");
+                        if (typeof currentPage !== 'undefined') {
+                            currentPage = 1;
+                            loadNotes(1);
+                        }
+                    }
+                    return;
+                }
+            }
+
+            document.querySelectorAll(".spa-page").forEach(e => e.classList.add("hidden"));
+            const targetPage = document.getElementById("page_" + p);
+            if (targetPage) {
+                targetPage.classList.remove("hidden");
+            } else {
+                console.error('Page not found: page_' + p);
+                return;
+            }
+
+            if (p === "trang_chu") {
+                currentPage = 1; // Reset to first page
+                loadNotes(1);
+            }
+        }
+
+        /* Update UI based on user permissions */
+        function updateUIByPermissions() {
+            // Only update permissions for trang_chu page, not for admin panel
+            const currentPage = document.querySelector('.spa-page:not(.hidden)');
+            if (!currentPage || currentPage.id !== 'page_trang_chu') {
+                return; // Don't hide buttons in admin panel
+            }
+
+            const formContainer = document.querySelector('.form-container');
+
+            // Check canAdd: true = can add, 1 = can add, false/0 = cannot add
+            if (formContainer) {
+                const canAdd = USER_PERMISSIONS.canAdd === true || USER_PERMISSIONS.canAdd === 1;
+                if (!canAdd) {
+                    formContainer.style.display = 'none';
+                } else {
+                    formContainer.style.display = '';
+                }
+            }
+        }
+
+        /* Update sidebar menu based on access permissions */
+        function updateSidebarMenu() {
+            const sidebarItems = document.querySelectorAll('.sidebar li[data-page]');
+
+            sidebarItems.forEach(item => {
+                const page = item.getAttribute('data-page');
+                if (!page || page === 'trang_chu') {
+                    // Always show trang_chu
+                    item.style.display = '';
+                    return;
+                }
+
+                // Check access permission
+                const hasAccess = USER_PERMISSIONS.access && USER_PERMISSIONS.access[page] === true;
+                if (!hasAccess) {
+                    item.style.display = 'none';
+                } else {
+                    item.style.display = '';
+                }
+            });
+        }
+
+        // Load permissions from localStorage on page load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                loadUserPermissions();
+            });
+        } else {
+            loadUserPermissions();
+        }
+
+        function loadUserPermissions() {
+            const storedUser = localStorage.getItem("spa_user");
+            if (storedUser) {
+                try {
+                    const userInfo = JSON.parse(storedUser);
+                    USER_PERMISSIONS = {
+                        canAdd: userInfo.canAdd || false,
+                        canEdit: userInfo.canEdit || false,
+                        canDelete: userInfo.canDelete || false,
+                        access: userInfo.access || {
+                            trang_chu: true,
+                            app_taive: false,
+                            bo_sung: false,
+                            quan_tri: false
+                        }
+                    };
+                    CURRENT_USER = userInfo.user;
+                    if (CURRENT_USER) {
+                        updateUIByPermissions();
+                        updateSidebarMenu();
+                    }
+                } catch (e) {
+                    console.error('Error loading user permissions:', e);
+                }
+            }
+        }
+
+        /* FILE UPLOAD & PASTE IMAGE */
+        let currentFileDataList = [];
+        let currentImageDataList = [];
+
+        // Initialize file upload handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('f_file');
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            const imageInput = document.getElementById('f_images');
+            const imageUploadArea = document.getElementById('imageUploadArea');
+
+            // File input change (multiple files)
+            if (fileInput) {
+                fileInput.addEventListener('change', function(e) {
+                    handleFilesSelect(Array.from(e.target.files), 'file');
+                });
+            }
+
+            // Image input change (multiple images)
+            if (imageInput) {
+                imageInput.addEventListener('change', function(e) {
+                    handleFilesSelect(Array.from(e.target.files), 'image');
+                });
+            }
+
+            // Drag and drop for files
+            if (fileUploadArea) {
+                fileUploadArea.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    fileUploadArea.classList.add('dragover');
+                });
+                fileUploadArea.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    fileUploadArea.classList.remove('dragover');
+                });
+                fileUploadArea.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    fileUploadArea.classList.remove('dragover');
+                    if (e.dataTransfer.files.length > 0) {
+                        handleFilesSelect(Array.from(e.dataTransfer.files), 'file');
+                    }
+                });
+            }
+
+            // Drag and drop for images
+            if (imageUploadArea) {
+                imageUploadArea.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    imageUploadArea.classList.add('dragover');
+                });
+                imageUploadArea.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    imageUploadArea.classList.remove('dragover');
+                });
+                imageUploadArea.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    imageUploadArea.classList.remove('dragover');
+                    if (e.dataTransfer.files.length > 0) {
+                        const imageFiles = Array.from(e.dataTransfer.files).filter(f => f.type.match('image.*'));
+                        handleFilesSelect(imageFiles, 'image');
+                    }
+                });
+            }
+
+            // Paste from clipboard - improved to work when imageUploadArea is focused or anywhere in form
+            if (imageUploadArea) {
+                // Focus imageUploadArea when clicked
+                imageUploadArea.addEventListener('click', function() {
+                    imageUploadArea.focus();
+                });
+
+                // Handle paste when imageUploadArea is focused
+                imageUploadArea.addEventListener('paste', function(e) {
+                    const items = e.clipboardData.items;
+                    for (let i = 0; i < items.length; i++) {
+                        if (items[i].type.indexOf('image') !== -1) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const blob = items[i].getAsFile();
+                            handleFilesSelect([blob], 'image');
+                            break;
+                        }
+                    }
+                });
+
+                // Also handle global paste when in form
+                document.addEventListener('paste', function(e) {
+                    // Check if we're in the form container
+                    const activeElement = document.activeElement;
+                    const formContainer = document.querySelector('.form-container');
+                    const isInForm = formContainer && (
+                        activeElement === imageUploadArea ||
+                        activeElement.closest('#imageUploadArea') ||
+                        activeElement.closest('.form-container')
+                    );
+
+                    if (isInForm) {
+                        const items = e.clipboardData.items;
+                        for (let i = 0; i < items.length; i++) {
+                            if (items[i].type.indexOf('image') !== -1) {
+                                e.preventDefault();
+                                const blob = items[i].getAsFile();
+                                handleFilesSelect([blob], 'image');
+                                // Focus imageUploadArea to show it's working
+                                if (imageUploadArea) {
+                                    imageUploadArea.focus();
+                                }
+                                break;
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
+        function handleFilesSelect(files, type) {
+            if (!files || files.length === 0) return;
+
+            const targetList = type === 'image' ? currentImageDataList : currentFileDataList;
+            const previewListId = type === 'image' ? 'imagePreviewList' : 'filePreviewList';
+            const previewId = type === 'image' ? 'imagePreview' : 'filePreview';
+
+            files.forEach(file => {
+                // For images, validate image type
+                if (type === 'image' && !file.type.match('image.*')) {
+                    alert('Vui lòng chọn file hình ảnh');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const fileData = {
+                        base64: e.target.result,
+                        mimeType: file.type,
+                        fileName: file.name || (type === 'image' ? 'pasted-image.png' : 'file'),
+                        id: Date.now() + Math.random()
+                    };
+                    targetList.push(fileData);
+                    updatePreview(previewListId, fileData, type);
+                    document.getElementById(previewId).style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function updatePreview(previewListId, fileData, type) {
+            const previewList = document.getElementById(previewListId);
+            const previewItem = document.createElement('div');
+            previewItem.id = 'preview-' + fileData.id;
+            previewItem.style.cssText = 'position:relative; display:inline-block;';
+
+            if (type === 'image') {
+                previewItem.innerHTML = `
+      <img src="${fileData.base64}" alt="Preview" style="width:100px; height:100px; object-fit:cover; border-radius:8px; border:2px solid #e0e0e0;">
+      <button onclick="removePreviewItem('${fileData.id}', 'image')" style="position:absolute; top:-5px; right:-5px; background:#f44336; color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer; font-size:14px;">×</button>
+    `;
+            } else {
+                previewItem.innerHTML = `
+      <div style="width:100px; height:100px; background:#f5f5f5; border-radius:8px; border:2px solid #e0e0e0; display:flex; align-items:center; justify-content:center; flex-direction:column; padding:10px;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#666;">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        <div style="font-size:10px; text-align:center; word-break:break-all; margin-top:4px;">${fileData.fileName.substring(0, 15)}${fileData.fileName.length > 15 ? '...' : ''}</div>
+      </div>
+      <button onclick="removePreviewItem('${fileData.id}', 'file')" style="position:absolute; top:-5px; right:-5px; background:#f44336; color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer; font-size:14px;">×</button>
+    `;
+            }
+            previewList.appendChild(previewItem);
+        }
+
+        function removePreviewItem(id, type) {
+            const targetList = type === 'image' ? currentImageDataList : currentFileDataList;
+            const index = targetList.findIndex(item => item.id.toString() === id.toString());
+            if (index > -1) {
+                targetList.splice(index, 1);
+                const previewItem = document.getElementById('preview-' + id);
+                if (previewItem) previewItem.remove();
+
+                // Hide preview if no items left
+                const previewListId = type === 'image' ? 'imagePreviewList' : 'filePreviewList';
+                const previewId = type === 'image' ? 'imagePreview' : 'filePreview';
+                const previewList = document.getElementById(previewListId);
+                if (previewList.children.length === 0) {
+                    document.getElementById(previewId).style.display = 'none';
+                }
+            }
+        }
+
+        function clearFilePreview() {
+            currentFileDataList = [];
+            document.getElementById('f_file').value = '';
+            document.getElementById('filePreview').style.display = 'none';
+            document.getElementById('filePreviewList').innerHTML = '';
+        }
+
+        function clearImagePreview() {
+            currentImageDataList = [];
+            document.getElementById('f_images').value = '';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('imagePreviewList').innerHTML = '';
+        }
+
+        /* SAVE NOTE */
+        // Store existing URLs for edit mode
+        window.existingFileUrlsForEdit = [];
+        window.existingImageUrlsForEdit = [];
+
+        function removeExistingFile(index) {
+            if (window.existingFileUrlsForEdit && window.existingFileUrlsForEdit.length > index) {
+                window.existingFileUrlsForEdit.splice(index, 1);
+                // Re-render preview
+                const filePreviewList = document.getElementById('filePreviewList');
+                filePreviewList.innerHTML = '';
+                window.existingFileUrlsForEdit.forEach((url, idx) => {
+                    const previewItem = document.createElement('div');
+                    previewItem.style.cssText = 'position:relative; display:inline-block; margin:5px;';
+                    const fileName = getFileNameFromUrl(url);
+                    previewItem.innerHTML = `
+          <div style="width:100px; height:100px; background:#f5f5f5; border-radius:8px; border:2px solid #e0e0e0; display:flex; align-items:center; justify-content:center; flex-direction:column; padding:10px;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#666;">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <div style="font-size:10px; text-align:center; word-break:break-all; margin-top:4px;"><a href="${escapeHtml(url)}" target="_blank" style="text-decoration:none; color:#1976d2;">${escapeHtml(fileName)}</a></div>
+            <button onclick="removeExistingFile(${idx})" style="position:absolute; top:-5px; right:-5px; background:#f44336; color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer; font-size:14px;">×</button>
+          </div>
+        `;
+                    filePreviewList.appendChild(previewItem);
+                });
+                if (window.existingFileUrlsForEdit.length === 0) {
+                    document.getElementById('filePreview').style.display = 'none';
+                }
+            }
+        }
+
+        function removeExistingImage(index) {
+            if (window.existingImageUrlsForEdit && window.existingImageUrlsForEdit.length > index) {
+                window.existingImageUrlsForEdit.splice(index, 1);
+                // Re-render preview
+                const imagePreviewList = document.getElementById('imagePreviewList');
+                imagePreviewList.innerHTML = '';
+                window.existingImageUrlsForEdit.forEach((url, idx) => {
+                    const previewItem = document.createElement('div');
+                    previewItem.style.cssText = 'position:relative; display:inline-block; margin:5px;';
+                    const thumbnailUrl = convertDriveUrl(url);
+                    previewItem.innerHTML = `
+          <img src="${escapeHtml(thumbnailUrl)}" alt="Preview" style="width:100px; height:100px; object-fit:cover; border-radius:8px; border:2px solid #e0e0e0;" onerror="this.style.display='none'">
+          <button onclick="removeExistingImage(${idx})" style="position:absolute; top:-5px; right:-5px; background:#f44336; color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer; font-size:14px;">×</button>
+        `;
+                    imagePreviewList.appendChild(previewItem);
+                });
+                if (window.existingImageUrlsForEdit.length === 0) {
+                    document.getElementById('imagePreview').style.display = 'none';
+                }
+            }
+        }
+
+        function saveNoteUI() {
+            const editId = document.getElementById('editNoteId').value;
+            const isEdit = editId !== '';
+
+            function save(fileUrls, imgUrls) {
+                const note = {
+                    linhVuc: f_lv.value,
+                    diaBan: f_db.value,
+                    tieuDe: f_td.value,
+                    chiTiet: f_ct.value,
+                    huongGQ: f_hgq.value,
+                    gopY: f_gy.value,
+                    fileUrl: fileUrls || '',
+                    imgUrls: imgUrls || ''
+                };
+
+                // Debug: log the note data being sent
+                console.log('Saving note:', note);
+                console.log('Current user:', CURRENT_USER);
+
+                if (isEdit) {
+                    google.script.run.withSuccessHandler(function() {
+                        alert("Đã cập nhật!");
+                        cancelEdit();
+                        loadNotes(currentPage);
+                    }).updateNote(parseInt(editId), note, CURRENT_USER);
+                } else {
+                    google.script.run
+                        .withSuccessHandler(function(result) {
+                            if (result && result.success === false) {
+                                alert('Lỗi khi lưu: ' + (result.error || 'Unknown error'));
+                                console.error('Save error:', result);
+                            } else {
+                                alert("Đã lưu!");
+                                resetForm();
+                                loadNotes(currentPage);
+                            }
+                        })
+                        .withFailureHandler(function(error) {
+                            console.error('Save error:', error);
+                            alert('Lỗi khi lưu: ' + error.toString());
+                        })
+                        .saveNote(note, CURRENT_USER);
+                }
+            }
+
+            // Upload files first
+            const filesToUpload = currentFileDataList.length > 0 ? currentFileDataList : [];
+            const imagesToUpload = currentImageDataList.length > 0 ? currentImageDataList : [];
+
+            // Upload all files
+            let uploadedFileUrls = [];
+            let uploadedImageUrls = [];
+            let filesUploaded = 0;
+            let imagesUploaded = 0;
+            const totalFiles = filesToUpload.length;
+            const totalImages = imagesToUpload.length;
+
+            function checkAndSave() {
+                if (filesUploaded >= totalFiles && imagesUploaded >= totalImages) {
+                    // Combine existing URLs (for edit mode) with newly uploaded URLs
+                    let finalFileUrls = [];
+                    let finalImageUrls = [];
+
+                    if (isEdit) {
+                        // In edit mode, include existing URLs
+                        if (window.existingFileUrlsForEdit) {
+                            finalFileUrls = finalFileUrls.concat(window.existingFileUrlsForEdit);
+                        }
+                        if (window.existingImageUrlsForEdit) {
+                            finalImageUrls = finalImageUrls.concat(window.existingImageUrlsForEdit);
+                        }
+                    }
+
+                    // Add newly uploaded URLs
+                    finalFileUrls = finalFileUrls.concat(uploadedFileUrls);
+                    finalImageUrls = finalImageUrls.concat(uploadedImageUrls);
+
+                    // Join URLs with newline and comma
+                    const fileUrlsStr = finalFileUrls.join(',\n');
+                    const imgUrlsStr = finalImageUrls.join(',\n');
+                    save(fileUrlsStr, imgUrlsStr);
+                    // Clear lists
+                    currentFileDataList = [];
+                    currentImageDataList = [];
+                    window.existingFileUrlsForEdit = [];
+                    window.existingImageUrlsForEdit = [];
+                }
+            }
+
+            // If no files or images, save immediately (but include existing URLs in edit mode)
+            if (totalFiles === 0 && totalImages === 0) {
+                if (isEdit) {
+                    const fileUrlsStr = (window.existingFileUrlsForEdit || []).join(',\n');
+                    const imgUrlsStr = (window.existingImageUrlsForEdit || []).join(',\n');
+                    save(fileUrlsStr, imgUrlsStr);
+                } else {
+                    save("", "");
+                }
+                return;
+            }
+
+            // Upload files
+            if (totalFiles > 0) {
+                filesToUpload.forEach((fileData, index) => {
+                    google.script.run.withSuccessHandler(function(res) {
+                        uploadedFileUrls.push(res.url);
+                        filesUploaded++;
+                        checkAndSave();
+                    }).uploadFile(fileData);
+                });
+            } else {
+                filesUploaded = totalFiles; // Set to 0 if no files
+            }
+
+            // Upload images
+            if (totalImages > 0) {
+                imagesToUpload.forEach((imageData, index) => {
+                    google.script.run.withSuccessHandler(function(res) {
+                        uploadedImageUrls.push(res.url);
+                        imagesUploaded++;
+                        checkAndSave();
+                    }).uploadImage(imageData);
+                });
+            } else {
+                imagesUploaded = totalImages; // Set to 0 if no images
+            }
+
+            // If no files or images to upload, check and save immediately
+            if (totalFiles === 0 && totalImages === 0) {
+                checkAndSave();
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('f_lv').value = '';
+            document.getElementById('f_db').value = '';
+            document.getElementById('f_td').value = '';
+            document.getElementById('f_ct').value = '';
+            document.getElementById('f_hgq').value = '';
+            document.getElementById('f_gy').value = '';
+            clearFilePreview();
+            clearImagePreview();
+            document.getElementById('editNoteId').value = '';
+            document.getElementById('formTitle').textContent = 'Thêm Note';
+            document.getElementById('saveBtn').textContent = 'Lưu Note';
+            document.getElementById('cancelBtn').style.display = 'none';
+            // Clear existing URLs for edit mode
+            window.existingFileUrlsForEdit = [];
+            window.existingImageUrlsForEdit = [];
+        }
+
+        function cancelEdit() {
+            resetForm();
+        }
+
+        /* HASHTAG FUNCTIONS */
+        function setLinhVuc(value) {
+            document.getElementById('f_lv').value = value;
+            document.getElementById('f_lv').focus();
+        }
+
+        function setDiaBan(value) {
+            document.getElementById('f_db').value = value;
+            document.getElementById('f_db').focus();
+        }
+
+        function addHashtag(type) {
+            const inputId = type === 'linhVuc' ? 'f_lv' : 'f_db';
+            const containerId = type === 'linhVuc' ? 'hashtagLinhVuc' : 'hashtagDiaBan';
+            const input = document.getElementById(inputId);
+            const container = document.getElementById(containerId);
+
+            const newValue = prompt('Nhập hashtag mới:');
+            if (newValue && newValue.trim()) {
+                const trimmedValue = newValue.trim();
+                // Check if already exists
+                const existingButtons = container.querySelectorAll('.hashtag-btn:not(.hashtag-add)');
+                let exists = false;
+                existingButtons.forEach(btn => {
+                    if (btn.textContent.trim() === '#' + trimmedValue) {
+                        exists = true;
+                    }
+                });
+
+                if (!exists) {
+                    // Create new button
+                    const newBtn = document.createElement('button');
+                    newBtn.type = 'button';
+                    newBtn.className = 'hashtag-btn';
+                    newBtn.textContent = '# ' + trimmedValue;
+                    if (type === 'linhVuc') {
+                        newBtn.onclick = function() {
+                            setLinhVuc(trimmedValue);
+                        };
+                    } else {
+                        newBtn.onclick = function() {
+                            setDiaBan(trimmedValue);
+                        };
+                    }
+
+                    // Insert before the "+ Thêm" button
+                    const addBtn = container.querySelector('.hashtag-add');
+                    if (addBtn) {
+                        container.insertBefore(newBtn, addBtn);
+                    } else {
+                        container.appendChild(newBtn);
+                    }
+
+                    // Set value to input
+                    input.value = trimmedValue;
+                    input.focus();
+                } else {
+                    alert('Hashtag này đã tồn tại!');
+                }
+            }
+        }
+
+        /* SEARCH NOTES */
+        function searchNotes() {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            if (!searchTerm) {
+                loadNotes();
+                return;
+            }
+
+            const box = document.getElementById("notesContainer");
+            box.innerHTML = "Đang tìm kiếm...";
+
+            google.script.run
+                .withFailureHandler(err => {
+                    box.innerHTML = `<div style="color:red; padding:20px;">Lỗi tìm kiếm: ${err.toString()}</div>`;
+                })
+                .withSuccessHandler(res => {
+                    if (res.error) {
+                        box.innerHTML = `<div style="color:red; padding:20px;">${res.error}</div>`;
+                        return;
+                    }
+                    if (!res.rows || res.rows.length === 0) {
+                        box.innerHTML = `<div style="padding:20px; color:#666;">Không tìm thấy kết quả cho "${searchTerm}"</div>`;
+                        document.getElementById('paginationContainer').style.display = 'none';
+                        return;
+                    }
+                    renderNotes(res.headers, res.rows);
+                    // Hide pagination for search results
+                    document.getElementById('paginationContainer').style.display = 'none';
+                })
+                .searchNotes(searchTerm);
+        }
+
+        /* FILTER BY DATE */
+        function filterByDate() {
+            const dateFrom = document.getElementById('filterDateFrom').value;
+            const dateTo = document.getElementById('filterDateTo').value;
+
+            if (!dateFrom && !dateTo) {
+                loadNotes();
+                return;
+            }
+
+            const box = document.getElementById("notesContainer");
+            box.innerHTML = "Đang lọc...";
+
+            google.script.run
+                .withFailureHandler(err => {
+                    box.innerHTML = `<div style="color:red; padding:20px;">Lỗi lọc: ${err.toString()}</div>`;
+                })
+                .withSuccessHandler(res => {
+                    if (res.error) {
+                        box.innerHTML = `<div style="color:red; padding:20px;">${res.error}</div>`;
+                        return;
+                    }
+                    if (!res.rows || res.rows.length === 0) {
+                        box.innerHTML = `<div style="padding:20px; color:#666;">Không có dữ liệu trong khoảng thời gian đã chọn</div>`;
+                        document.getElementById('paginationContainer').style.display = 'none';
+                        return;
+                    }
+                    renderNotes(res.headers, res.rows);
+                    // Hide pagination for filter results
+                    document.getElementById('paginationContainer').style.display = 'none';
+                })
+                .filterNotesByDate(dateFrom, dateTo);
+        }
+
+        /* PAGINATION VARIABLES */
+        let currentPage = 1;
+        let pageSize = 10;
+        let totalRows = 0;
+        let totalPages = 1;
+
+        /* LOAD NOTES (robust + debug) */
+        // 
+
+        function loadNotes(page) {
+            if (page) currentPage = page;
+            const box = document.getElementById("notesContainer");
+            box.innerHTML = "Đang tải...";
+
+            // Get page size from select
+            const pageSizeSelect = document.getElementById('pageSizeSelect');
+            if (pageSizeSelect) {
+                pageSize = parseInt(pageSizeSelect.value) || 10;
+            }
+
+
+            // Kiểm tra xem google.script.run có sẵn không
+            if (typeof google === 'undefined' || typeof google.script === 'undefined' || typeof google.script.run === 'undefined') {
+                box.innerHTML = `<div style="color:red; padding:20px;">
+      <strong>Lỗi:</strong> Google Apps Script API không khả dụng. Vui lòng tải lại trang.
+    </div>`;
+                return;
+            }
+
+            // Set timeout để phát hiện nếu hàm không trả về
+            let timeoutId = setTimeout(() => {
+                box.innerHTML = `<div style="color:orange; padding:20px;">
+      <strong>Cảnh báo:</strong> Không nhận được phản hồi từ server sau 30 giây.<br><br>
+      <button onclick="loadNotes(1)" style="padding:8px 16px; background:#1976d2; color:white; border:none; border-radius:4px; cursor:pointer;">
+        Thử lại
+      </button>
+    </div>`;
+            }, 30000);
+
+            try {
+                google.script.run
+                    .withFailureHandler(err => {
+                        clearTimeout(timeoutId);
+                        const errMsg = err && err.message ? err.message : (err && err.toString ? err.toString() : JSON.stringify(err));
+                        box.innerHTML = `<div style="color:red; padding:20px;">
+          <strong>Lỗi tải dữ liệu:</strong><br>
+          ${errMsg}<br><br>
+          <button onclick="loadNotes(1)" style="padding:8px 16px; background:#1976d2; color:white; border:none; border-radius:4px; cursor:pointer; margin-top:10px;">
+            Thử lại
+          </button>
+        </div>`;
+                    })
+                    .withSuccessHandler(res => {
+                        clearTimeout(timeoutId);
+
+                        if (res === null || res === undefined) {
+                            box.innerHTML = `<div style="color:red; padding:20px;">
+            <strong>Không nhận được phản hồi từ server.</strong><br><br>
+            <button onclick="loadNotes(1)" style="padding:8px 16px; background:#1976d2; color:white; border:none; border-radius:4px; cursor:pointer; margin-top:10px;">
+              Thử lại
+            </button>
+          </div>`;
+                            return;
+                        }
+
+                        if (res.error) {
+                            box.innerHTML = `<div style="color:red; padding:20px;">
+            <strong>Lỗi từ server:</strong> ${res.error}<br><br>
+            <button onclick="loadNotes(1)" style="padding:8px 16px; background:#1976d2; color:white; border:none; border-radius:4px; cursor:pointer; margin-top:10px;">
+              Thử lại
+            </button>
+          </div>`;
+                            return;
+                        }
+
+                        if (!res.rows || res.rows.length === 0) {
+                            box.innerHTML = "Không có dữ liệu để hiển thị.";
+                            document.getElementById('paginationContainer').style.display = 'none';
+                            return;
+                        }
+
+                        // Update pagination info
+                        totalRows = res.totalRows || res.rows.length;
+                        totalPages = res.totalPages || 1;
+                        currentPage = res.page || 1;
+
+                        // Store rows and headers for modal access
+                        currentNoteRows = res.rows;
+                        currentNoteHeaders = res.headers;
+
+                        renderNotes(res.headers, res.rows);
+                        updatePaginationUI();
+                    })
+                    .getNotes(currentPage, pageSize); // Pass page and pageSize
+            } catch (e) {
+                clearTimeout(timeoutId);
+                box.innerHTML = `<div style="color:red; padding:20px;">
+      <strong>Lỗi exception:</strong> ${e.toString()}
+    </div>`;
+            }
+        }
+
+
+        /* RENDER TABLE (xử lý rows là array of objects) */
+        function renderNotes(headers, rows) {
+            const box = document.getElementById("notesContainer");
+
+            // helper để escape text
+            function escapeHtml(str) {
+                return String(str === null || str === undefined ? '' : str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            }
+
+            // Defensive: if headers is empty but rows are objects, infer headers from keys order
+            if ((!headers || headers.length === 0) && rows.length > 0 && typeof rows[0] === 'object') {
+                headers = Object.keys(rows[0]);
+            }
+
+            // If still no headers, abort
+            if (!headers || headers.length === 0) {
+                box.innerHTML = "Không có header để hiển thị";
+                return;
+            }
+
+            // Find file column and img column
+            let fileCol = null;
+            let imgCol = null;
+            headers.forEach((h, idx) => {
+                const hLower = h.toLowerCase();
+                if (hLower.includes('file') && !hLower.includes('img')) {
+                    fileCol = h;
+                }
+                if (hLower === 'img' || hLower.includes('img')) {
+                    imgCol = h;
+                }
+            });
+
+            // Filter out _rowNum, log_update, and ID from display headers
+            const displayHeaders = headers.filter(h => {
+                const hLower = h.toLowerCase();
+                return h !== '_rowNum' &&
+                    hLower !== 'log_update' &&
+                    hLower !== 'id';
+            });
+
+            let html = `<div class="table-wrapper"><table class="table-notes"><thead><tr>`;
+            // Add STT column first
+            html += `<th style="width:60px; text-align:center;">STT</th>`;
+            displayHeaders.forEach(h => {
+                html += `<th>${escapeHtml(h)}</th>`;
+            });
+            // Add action column
+            html += `<th style="width:150px;">Thao tác</th>`;
+            html += `</tr></thead><tbody>`;
+
+            rows.forEach((r, rowIdx) => {
+                // Get row number from _rowNum field (stored by server)
+                const rowNum = r._rowNum || (rowIdx + 2);
+
+                // Calculate sequential number based on current page and page size
+                const stt = (currentPage - 1) * pageSize + rowIdx + 1;
+
+                // Click row to show note detail modal
+                html += `<tr onclick="showNoteDetailModal(${rowNum}, ${rowIdx}, event)" style="cursor:pointer;">`;
+                // Add STT cell first
+                html += `<td style="text-align:center; font-weight:500;" data-row-num="${rowNum}">${stt}</td>`;
+                // r expected to be an object where keys match headers
+                displayHeaders.forEach(h => {
+                    let v = (r && (h in r)) ? r[h] : '';
+
+                    // Special handling for img column - show multiple image thumbnails
+                    if (h === imgCol && v) {
+                        const imgUrls = String(v).split(/[,\n]/).filter(url => url.trim());
+                        // Store imgUrls in data attribute for editing
+                        const imgUrlsJson = JSON.stringify(imgUrls);
+                        if (imgUrls.length > 0) {
+                            // Add onclick to td to show image popup, stop propagation to prevent row click
+                            // Only show popup when clicking on the td cell itself (not on img inside, img has its own onclick)
+                            html += `<td class="img-cell" data-img-urls="${escapeHtml(imgUrlsJson)}" data-row-num="${rowNum}" data-col-name="${escapeHtml(h)}" onclick="event.stopPropagation(); event.cancelBubble=true; if(event.target.tagName !== 'IMG' && event.target.tagName !== 'DIV' && event.target.tagName !== 'BUTTON' && event.target.tagName !== 'SPAN') { showImagesFromRow(${rowNum}, ${rowIdx}, ${imgUrlsJson}, event); }" style="cursor:pointer;">`;
+
+                            // Only show first image
+                            const firstUrl = imgUrls[0].trim();
+                            if (/^https?:\/\//i.test(firstUrl)) {
+                                const thumbnailUrl = convertDriveUrl(firstUrl);
+                                const safeOriginal = escapeHtml(firstUrl);
+                                const safeThumbnail = escapeHtml(thumbnailUrl);
+                                const fileName = getFileNameFromUrl(firstUrl);
+                                const uniqueId = 'img_' + rowNum + '_0';
+                                const remainingCount = imgUrls.length - 1;
+
+                                html += `<div style="position:relative; display:inline-block; margin:2px;">`;
+                                // Use data attributes to avoid JSON escaping issues in onclick
+                                html += `<img id="${uniqueId}" src="${safeThumbnail}" alt="${escapeHtml(fileName)}" class="img-thumbnail" 
+                                     data-img-urls="${escapeHtml(imgUrlsJson)}" data-row-num="${rowNum}" data-col-name="${escapeHtml(h)}" data-img-index="0" data-thumbnail="${safeThumbnail}"
+                                     onclick="event.stopPropagation(); event.cancelBubble=true; handleImageClick(this);" 
+                                         onerror="handleImageError(this, '${safeOriginal}', '${escapeHtml(fileName)}')"
+                                         style="margin:2px; cursor:pointer;" title="Click để xem ảnh">`;
+
+                                // Show badge with remaining count if there are more images
+                                if (remainingCount > 0) {
+                                    html += `<span style="position:absolute; bottom:4px; right:4px; background:rgba(0,0,0,0.5); color:white; padding:4px 8px; border-radius:12px; font-size:14px; font-weight:bold; pointer-events:none; backdrop-filter:blur(4px);">+${remainingCount}</span>`;
+                                }
+
+                                html += `</div>`;
+                            }
+                            html += `</td>`;
+                        } else {
+                            html += `<td class="img-cell" data-img-urls="[]" data-row-num="${rowNum}" data-col-name="${escapeHtml(h)}"></td>`;
+                        }
+                    }
+                    // Special handling for File column - show image thumbnail or link
+                    else if (h === fileCol && v) {
+                        const fileUrls = String(v).split(/[,\n]/).filter(url => url.trim());
+                        // Store fileUrls in data attribute for editing
+                        const fileUrlsJson = JSON.stringify(fileUrls);
+                        if (fileUrls.length > 0) {
+                            html += `<td class="img-cell" data-file-urls="${escapeHtml(fileUrlsJson)}" data-row-num="${rowNum}" data-col-name="${escapeHtml(h)}">`;
+                            fileUrls.forEach((url, idx) => {
+                                const originalUrl = url.trim();
+                                if (/^https?:\/\//i.test(originalUrl)) {
+                                    const safe = escapeHtml(originalUrl);
+                                    const fileName = getFileNameFromUrl(originalUrl);
+                                    // Check if it's an image URL
+                                    if (originalUrl.match(/\.(jpg|jpeg|png|gif|webp|bmp)(\?|$)/i) || originalUrl.includes('drive.google.com/file/d/')) {
+                                        const thumbnailUrl = convertDriveUrl(originalUrl);
+                                        const safeThumbnail = escapeHtml(thumbnailUrl);
+                                        const uniqueId = 'file_' + rowNum + '_' + idx;
+
+                                        html += `<div style="position:relative; display:inline-block; margin:2px;">`;
+                                        html += `<img id="${uniqueId}" src="${safeThumbnail}" alt="${escapeHtml(fileName)}" class="img-thumbnail" 
+                                             onclick="showImageModal('${safe}', '${safeThumbnail}')" 
+                                             onerror="handleImageError(this, '${safe}', '${escapeHtml(fileName)}')"
+                                             style="margin:2px; cursor:pointer;" title="Click để xem ảnh">`;
+                                        html += `</div>`;
+                                    } else {
+                                        html += `<a href="${safe}" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:6px; margin:2px; padding:8px 12px; background:#1976d2; color:white; border-radius:6px; text-decoration:none;" title="${escapeHtml(fileName)}">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                              <polyline points="14 2 14 8 20 8"></polyline>
+                                              <line x1="16" y1="13" x2="8" y2="13"></line>
+                                              <line x1="16" y1="17" x2="8" y2="17"></line>
+                                              <polyline points="10 9 9 9 8 9"></polyline>
+                                            </svg>
+                                            ${escapeHtml(fileName || 'Tải về')}
+                                          </a>`;
+                                    }
+                                }
+                            });
+                            html += `</td>`;
+                        } else {
+                            html += `<td class="img-cell" data-file-urls="[]" data-row-num="${rowNum}" data-col-name="${escapeHtml(h)}"></td>`;
+                        }
+                    } else {
+                        // if value is an array, join
+                        if (Array.isArray(v)) v = v.join(", ");
+                        // if looks like URL -> render as link
+                        const s = String(v || '');
+                        if (/^https?:\/\//i.test(s)) {
+                            const safe = escapeHtml(s);
+                            html += `<td><a href="${safe}" target="_blank" rel="noopener">${safe}</a></td>`;
+                        } else {
+                            // Truncate long text
+                            const displayText = s.length > 100 ? s.substring(0, 100) + '...' : s;
+                            // Add data attribute for editing
+                            const cellId = 'cell_' + rowNum + '_' + escapeHtml(h);
+                            // Stop propagation for non-img cells to prevent triggering row click
+                            html += `<td id="${cellId}" data-row-num="${rowNum}" data-col-name="${escapeHtml(h)}" data-original-value="${escapeHtml(s)}" title="${escapeHtml(s)}" onclick="event.stopPropagation();">${escapeHtml(displayText)}</td>`;
+                        }
+                    }
+                });
+
+                // Add action buttons (stop propagation to prevent row click)
+                let actionButtonsHTML = '<td class="action-buttons" onclick="event.stopPropagation();">';
+
+                // Check canEdit: true = can edit, 2 = can edit, false/0 = cannot edit
+                const canEdit = USER_PERMISSIONS.canEdit === true || USER_PERMISSIONS.canEdit === 2;
+                if (canEdit) {
+                    actionButtonsHTML += `<button class="action-btn btn-edit" onclick="event.stopPropagation(); enableRowEdit(${rowNum}, ${rowIdx})" title="Sửa">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg>
+        Sửa
+      </button>`;
+                }
+
+                // Check canDelete: only true = can delete
+                if (USER_PERMISSIONS.canDelete === true) {
+                    actionButtonsHTML += `<button class="action-btn btn-delete" onclick="event.stopPropagation(); deleteNote(${rowNum})" title="Xóa">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+        Xóa
+      </button>`;
+                }
+
+                actionButtonsHTML += '</td>';
+                html += actionButtonsHTML;
+                html += "</tr>";
+            });
+
+            html += "</tbody></table></div>";
+            box.innerHTML = html;
+        }
+
+        /* PAGINATION FUNCTIONS */
+        function updatePaginationUI() {
+            const paginationContainer = document.getElementById('paginationContainer');
+            if (!paginationContainer) return;
+
+            // Show pagination if there are rows
+            if (totalRows > 0) {
+                paginationContainer.style.display = 'block';
+            } else {
+                paginationContainer.style.display = 'none';
+                return;
+            }
+
+            // Update page info
+            const startRow = (currentPage - 1) * pageSize + 1;
+            const endRow = Math.min(currentPage * pageSize, totalRows);
+            document.getElementById('pageInfo').textContent = `${startRow} - ${endRow} của ${totalRows}`;
+
+            // Update page size select
+            const pageSizeSelect = document.getElementById('pageSizeSelect');
+            if (pageSizeSelect) {
+                pageSizeSelect.value = pageSize.toString();
+            }
+
+            // Update button states
+            document.getElementById('btnFirst').disabled = currentPage === 1;
+            document.getElementById('btnPrev').disabled = currentPage === 1;
+            document.getElementById('btnNext').disabled = currentPage >= totalPages;
+            document.getElementById('btnLast').disabled = currentPage >= totalPages;
+
+            // Style disabled buttons
+            ['btnFirst', 'btnPrev', 'btnNext', 'btnLast'].forEach(btnId => {
+                const btn = document.getElementById(btnId);
+                if (btn.disabled) {
+                    btn.style.opacity = '0.5';
+                    btn.style.cursor = 'not-allowed';
+                } else {
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                }
+            });
+        }
+
+        function changePageSize() {
+            const pageSizeSelect = document.getElementById('pageSizeSelect');
+            if (pageSizeSelect) {
+                pageSize = parseInt(pageSizeSelect.value) || 10;
+                currentPage = 1; // Reset to first page when changing page size
+                loadNotes(1);
+            }
+        }
+
+        function goToFirstPage() {
+            if (currentPage > 1) {
+                loadNotes(1);
+            }
+        }
+
+        function goToPrevPage() {
+            if (currentPage > 1) {
+                loadNotes(currentPage - 1);
+            }
+        }
+
+        function goToNextPage() {
+            if (currentPage < totalPages) {
+                loadNotes(currentPage + 1);
+            }
+        }
+
+        function goToLastPage() {
+            if (currentPage < totalPages) {
+                loadNotes(totalPages);
+            }
+        }
+
+        /* UTILITY FUNCTIONS */
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function convertDriveUrl(url) {
+            if (!url || typeof url !== 'string') return url;
+
+            // Convert Google Drive URLs to thumbnail URLs for Apps Script display
+            // Handle various Google Drive URL formats
+            let fileId = null;
+
+            // Format 1: https://drive.google.com/file/d/FILE_ID/view?usp=drivesdk
+            // Format 2: https://drive.google.com/file/d/FILE_ID/view
+            const match1 = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+            if (match1) {
+                fileId = match1[1];
+            }
+
+            // Format 3: https://drive.google.com/open?id=FILE_ID
+            if (!fileId) {
+                const match2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+                if (match2) {
+                    fileId = match2[1];
+                }
+            }
+
+            // Format 4: https://drive.google.com/thumbnail?id=FILE_ID&sz=w800 (already thumbnail)
+            if (url.includes('/thumbnail?id=')) {
+                return url;
+            }
+
+            // If we found a file ID, convert to thumbnail URL for Apps Script
+            // Use sz=w800 for good quality thumbnail that works in Apps Script
+            if (fileId) {
+                return 'https://drive.google.com/thumbnail?id=' + fileId + '&sz=w800';
+            }
+
+            // If no match, return original URL
+            return url;
+        }
+
+        /* NOTE DETAIL MODAL FUNCTIONS - Now opens image modal directly */
+        function showNoteDetailModal(rowNum, rowIdx, e) {
+            // Stop event propagation to prevent triggering row click if event is provided
+            if (e && e.stopPropagation) {
+                e.stopPropagation();
+            }
+
+            if (!currentNoteRows || !currentNoteRows[rowIdx]) {
+                return;
+            }
+
+            const row = currentNoteRows[rowIdx];
+
+            // Find img column
+            let imgCol = null;
+            currentNoteHeaders.forEach(h => {
+                const hLower = String(h).toLowerCase();
+                if (hLower === 'img' || hLower.includes('img')) {
+                    imgCol = h;
+                }
+            });
+
+            // Get images
+            const imgUrls = imgCol && row[imgCol] ? String(row[imgCol]).split(/[,\n]/).filter(url => url.trim()) : [];
+
+            // If there are images, open image modal directly
+            if (imgUrls.length > 0) {
+                const firstUrl = imgUrls[0];
+                const thumbnailUrl = convertDriveUrl(firstUrl);
+                showImageModal(firstUrl, thumbnailUrl, rowNum, 'img', 0, imgUrls);
+            } else {
+                // If no images, show alert
+                alert('Note này không có hình ảnh');
+            }
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const imgModal = document.getElementById('imgModal');
+                if (imgModal && imgModal.style.display === 'flex') {
+                    closeImageModal();
+                }
+            }
+        });
+
+        /* UTILITY: Get file name from URL */
+        function getFileNameFromUrl(url) {
+            if (!url || typeof url !== 'string') return 'File';
+
+            // Try to extract from Google Drive URL
+            const driveMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+            if (driveMatch) {
+                return 'File_' + driveMatch[1].substring(0, 8) + '...';
+            }
+
+            // Try to extract from regular URL
+            try {
+                const urlObj = new URL(url);
+                const pathname = urlObj.pathname;
+                const fileName = pathname.split('/').pop();
+                if (fileName && fileName.includes('.')) {
+                    return decodeURIComponent(fileName);
+                }
+            } catch (e) {
+                // Ignore
+            }
+
+            return 'File';
+        }
+
+        /* UTILITY: Get actual file name from Google Drive URL */
+        function getFileNameFromDriveUrl(url) {
+            if (!url || typeof url !== 'string') return null;
+
+            // Extract file ID from Google Drive URL
+            const driveMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+            if (driveMatch) {
+                // We can't get the actual filename from URL alone
+                // The actual filename is stored in data-file-infos when uploading
+                return null;
+            }
+
+            return null;
+        }
+
+        /* UTILITY: Handle image error - show download button */
+        function handleImageError(imgElement, originalUrl, fileName) {
+            if (!imgElement) return;
+
+            const container = imgElement.parentElement;
+            if (!container) return;
+
+            // Replace image with download button
+            const safeUrl = escapeHtml(originalUrl);
+            const safeFileName = escapeHtml(fileName || 'Tải về');
+            container.innerHTML = '<a href="' + safeUrl + '" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:6px; padding:8px 12px; background:#1976d2; color:white; border-radius:6px; text-decoration:none; font-size:12px;" title="' + safeFileName + '"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> ' + safeFileName + '</a>';
+        }
+
+        /* IMAGE MODAL WITH ZOOM AND EDIT */
+        let currentZoom = 1;
+        let isDragging = false;
+        let dragStart = {
+            x: 0,
+            y: 0
+        };
+        let imagePosition = {
+            x: 0,
+            y: 0
+        };
+        let currentImageRowNum = null;
+        let currentImageColName = null;
+        let currentImageIndex = null;
+        let currentImageUrls = [];
+
+        function showImageModal(originalUrl, thumbnailUrl, rowNum, colName, imgIndex, allUrls) {
+            const modal = document.getElementById('imgModal');
+            const modalImg = document.getElementById('modalImg');
+
+            if (!modal || !modalImg) {
+                console.error('Image modal elements not found');
+                return;
+            }
+
+            // Store context for editing
+            currentImageRowNum = rowNum;
+            currentImageColName = colName || 'img';
+            currentImageIndex = imgIndex !== undefined ? imgIndex : 0;
+
+            // If allUrls is provided, use it; otherwise create array from single URL
+            if (allUrls && Array.isArray(allUrls) && allUrls.length > 0) {
+                currentImageUrls = allUrls;
+            } else if (originalUrl) {
+                currentImageUrls = [originalUrl];
+                currentImageIndex = 0;
+            } else {
+                console.warn('No image URLs provided');
+                return;
+            }
+
+            // Display image at specified index
+            displayImageInModal(currentImageIndex);
+
+            // Update thumbnails
+            updateImageThumbnails();
+
+            // Focus modal to enable paste
+            modal.style.display = 'flex';
+            modal.focus();
+        }
+
+        function displayImageInModal(index) {
+            if (!currentImageUrls || currentImageUrls.length === 0) {
+                console.warn('No image URLs available');
+                return;
+            }
+
+            if (index < 0) index = 0;
+            if (index >= currentImageUrls.length) index = currentImageUrls.length - 1;
+
+            currentImageIndex = index;
+            const originalUrl = currentImageUrls[index];
+
+            if (!originalUrl) {
+                console.warn('No URL at index', index);
+                return;
+            }
+
+            const thumbnailUrl = convertDriveUrl(originalUrl);
+
+            const modalImg = document.getElementById('modalImg');
+            if (!modalImg) {
+                console.error('modalImg element not found');
+                return;
+            }
+
+            // Set image source - try thumbnail first, fallback to original if thumbnail fails
+            modalImg.onerror = function() {
+                // If thumbnail fails, try original URL
+                if (this.src !== originalUrl) {
+                    this.src = originalUrl;
+                } else {
+                    console.error('Failed to load image:', originalUrl);
+                }
+            };
+
+            modalImg.src = thumbnailUrl || originalUrl;
+            modalImg.setAttribute('data-original-url', originalUrl);
+            modalImg.setAttribute('data-thumbnail-url', thumbnailUrl || originalUrl);
+            modalImg.removeAttribute('data-pasted-image');
+
+            // Reset zoom and position
+            currentZoom = 1;
+            imagePosition = {
+                x: 0,
+                y: 0
+            };
+            updateImageTransform();
+
+            // Update nav buttons
+            updateImageNavButtons();
+
+            // Update thumbnails
+            updateImageThumbnails();
+        }
+
+        // Error handler for modal image
+        function handleModalImageError(imgElement) {
+            if (!imgElement) return;
+
+            const originalUrl = imgElement.getAttribute('data-original-url');
+            if (originalUrl && imgElement.src !== originalUrl) {
+                // Try original URL if thumbnail fails
+                imgElement.src = originalUrl;
+            } else {
+                console.error('Failed to load image:', imgElement.src || originalUrl);
+            }
+        }
+
+        function updateImageThumbnails() {
+            const thumbnailsContainer = document.getElementById('imgModalThumbnails');
+            if (!thumbnailsContainer) return;
+
+            thumbnailsContainer.innerHTML = '';
+
+            if (!currentImageUrls || currentImageUrls.length === 0) {
+                // Show empty state or add button
+                return;
+            }
+
+            currentImageUrls.forEach((url, idx) => {
+                const thumbnailUrl = convertDriveUrl(url);
+
+                // Create wrapper
+                const wrapper = document.createElement('div');
+                wrapper.className = 'img-modal-thumbnail-wrapper';
+
+                // Create thumbnail image
+                const thumbnail = document.createElement('img');
+                thumbnail.src = thumbnailUrl;
+                thumbnail.className = 'img-modal-thumbnail';
+                if (idx === currentImageIndex) {
+                    thumbnail.classList.add('active');
+                }
+                thumbnail.onclick = function(e) {
+                    e.stopPropagation();
+                    displayImageInModal(idx);
+                };
+                thumbnail.onerror = function() {
+                    thumbnail.style.display = 'none';
+                    const errorDiv = document.createElement('div');
+                    errorDiv.style.cssText = 'width:80px; height:80px; background:#f5f5f5; border-radius:6px; border:2px solid #e0e0e0; display:flex; align-items:center; justify-content:center; font-size:12px; color:#999;';
+                    errorDiv.textContent = 'Lỗi';
+                    wrapper.appendChild(errorDiv);
+                };
+
+                // Create delete button
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'img-modal-thumbnail-delete';
+                deleteBtn.innerHTML = '×';
+                deleteBtn.title = 'Xóa ảnh này';
+                deleteBtn.onclick = function(e) {
+                    e.stopPropagation();
+                    deleteThumbnailImage(idx);
+                };
+
+                wrapper.appendChild(thumbnail);
+                wrapper.appendChild(deleteBtn);
+                thumbnailsContainer.appendChild(wrapper);
+            });
+        }
+
+        function deleteThumbnailImage(index) {
+            if (!currentImageUrls || index < 0 || index >= currentImageUrls.length) return;
+
+            if (confirm('Bạn có chắc chắn muốn xóa ảnh này?')) {
+                // Remove image from array
+                currentImageUrls.splice(index, 1);
+
+                // If no images left, close modal
+                if (currentImageUrls.length === 0) {
+                    updateImageColumnInSheet();
+                    closeImageModal();
+                    return;
+                }
+
+                // Adjust index if needed
+                if (currentImageIndex >= currentImageUrls.length) {
+                    currentImageIndex = currentImageUrls.length - 1;
+                }
+
+                // Update display
+                displayImageInModal(currentImageIndex);
+                updateImageThumbnails();
+            }
+        }
+
+        function updateImageNavButtons() {
+            const prevBtn = document.querySelector('.img-modal-nav-prev');
+            const nextBtn = document.querySelector('.img-modal-nav-next');
+
+            if (prevBtn) {
+                prevBtn.disabled = currentImageIndex <= 0;
+            }
+            if (nextBtn) {
+                nextBtn.disabled = currentImageIndex >= currentImageUrls.length - 1;
+            }
+        }
+
+        function showPrevImage() {
+            if (currentImageIndex > 0) {
+                displayImageInModal(currentImageIndex - 1);
+            }
+        }
+
+        function showNextImage() {
+            if (currentImageIndex < currentImageUrls.length - 1) {
+                displayImageInModal(currentImageIndex + 1);
+            }
+        }
+
+        // Handle paste in modal - improved to work anywhere in modal
+        document.addEventListener('paste', function(e) {
+            const modal = document.getElementById('imgModal');
+            if (modal && modal.style.display === 'flex') {
+                const items = e.clipboardData.items;
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].type.indexOf('image') !== -1) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const blob = items[i].getAsFile();
+                        uploadAndAddImageToModal(blob);
+                        break;
+                    }
+                }
+            }
+        });
+
+        function addImageToModal() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.multiple = true;
+            input.style.display = 'none';
+            input.onchange = function(e) {
+                const files = Array.from(e.target.files);
+                files.forEach(file => {
+                    uploadAndAddImageToModal(file);
+                });
+                input.remove();
+            };
+            document.body.appendChild(input);
+            input.click();
+        }
+
+        function uploadAndAddImageToModal(file) {
+            if (!file.type.match('image.*')) {
+                alert('Vui lòng chọn file hình ảnh');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Data = e.target.result;
+                const base64Only = base64Data.split(',')[1];
+                const mimeType = base64Data.match(/data:([^;]+);/)[1];
+
+                // Show loading state
+                const modalImg = document.getElementById('modalImg');
+                modalImg.src = base64Data;
+                modalImg.style.opacity = '0.5';
+
+                // Upload image
+                google.script.run
+                    .withSuccessHandler(function(result) {
+                        if (result && result.url) {
+                            // Add to image URLs array
+                            if (!currentImageUrls) currentImageUrls = [];
+                            currentImageUrls.push(result.url);
+
+                            // Display the newly added image
+                            currentImageIndex = currentImageUrls.length - 1;
+                            displayImageInModal(currentImageIndex);
+                            updateImageThumbnails();
+
+                            modalImg.style.opacity = '1';
+                        } else {
+                            alert('Lỗi khi upload ảnh');
+                            modalImg.style.opacity = '1';
+                        }
+                    })
+                    .withFailureHandler(function(error) {
+                        alert('Lỗi: ' + error.toString());
+                        modalImg.style.opacity = '1';
+                    })
+                    .uploadImageFromBase64(base64Only, mimeType);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function pasteImageToModal() {
+            // This function is no longer needed as paste is handled directly
+            // But keep it for backward compatibility
+            const modal = document.getElementById('imgModal');
+            if (modal) {
+                modal.focus();
+            }
+        }
+
+        function deleteImageFromModal() {
+            if (!currentImageRowNum || currentImageIndex === null) {
+                alert('Không thể xác định ảnh để xóa');
+                return;
+            }
+
+            if (confirm('Bạn có chắc chắn muốn xóa ảnh này?')) {
+                // Remove image from array
+                if (currentImageUrls && currentImageUrls.length > currentImageIndex) {
+                    currentImageUrls.splice(currentImageIndex, 1);
+
+                    // If no images left, close modal
+                    if (currentImageUrls.length === 0) {
+                        updateImageColumnInSheet();
+                        closeImageModal();
+                        return;
+                    }
+
+                    // Adjust index if needed
+                    if (currentImageIndex >= currentImageUrls.length) {
+                        currentImageIndex = currentImageUrls.length - 1;
+                    }
+
+                    // Display next/prev image or first image
+                    displayImageInModal(currentImageIndex);
+
+                    // Save changes
+                    saveImageChanges();
+                }
+            }
+        }
+
+        function saveImageChanges() {
+            if (!currentImageRowNum || !currentImageColName) {
+                alert('Không thể xác định vị trí để lưu');
+                return;
+            }
+
+            // Update in sheet with current image URLs
+            if (currentImageUrls && currentImageUrls.length > 0) {
+                updateImageColumnInSheet();
+            } else {
+                // No images left, update to empty
+                updateImageColumnInSheet();
+            }
+        }
+
+        function updateImageColumnInSheet() {
+            if (!currentImageRowNum || !currentImageColName) return;
+
+            const imgUrlsString = currentImageUrls.join(',\n');
+
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result && result.success) {
+                        alert('Đã lưu thành công!');
+                        closeImageModal();
+                        loadNotes(currentPage);
+                    } else {
+                        alert('Lỗi khi lưu: ' + (result.error || 'Unknown error'));
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    alert('Lỗi: ' + error.toString());
+                })
+                .updateNoteColumn(currentImageRowNum, currentImageColName, imgUrlsString);
+        }
+
+        function closeImageModal() {
+            document.getElementById('imgModal').style.display = 'none';
+            currentZoom = 1;
+            imagePosition = {
+                x: 0,
+                y: 0
+            };
+            isDragging = false;
+            // Clear context
+            currentImageRowNum = null;
+            currentImageColName = null;
+            currentImageIndex = null;
+            currentImageUrls = [];
+        }
+
+        function zoomIn() {
+            currentZoom = Math.min(currentZoom * 1.2, 5);
+            updateImageTransform();
+        }
+
+        function zoomOut() {
+            currentZoom = Math.max(currentZoom / 1.2, 0.5);
+            updateImageTransform();
+        }
+
+        function resetZoom() {
+            currentZoom = 1;
+            imagePosition = {
+                x: 0,
+                y: 0
+            };
+            updateImageTransform();
+        }
+
+        function toggleFullscreen() {
+            const modal = document.getElementById('imgModal');
+            const fullscreenIcon = document.getElementById('fullscreenIcon');
+
+            if (!modal) return;
+
+            if (modal.classList.contains('fullscreen')) {
+                // Exit fullscreen
+                modal.classList.remove('fullscreen');
+                if (fullscreenIcon) {
+                    fullscreenIcon.innerHTML = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>';
+                }
+            } else {
+                // Enter fullscreen
+                modal.classList.add('fullscreen');
+                if (fullscreenIcon) {
+                    fullscreenIcon.innerHTML = '<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>';
+                }
+            }
+
+            // Reset zoom and position when toggling fullscreen
+            setTimeout(() => {
+                updateImageTransform();
+            }, 100);
+        }
+
+        function updateImageTransform() {
+            const modalImg = document.getElementById('modalImg');
+            if (modalImg) {
+                modalImg.style.transform = 'translate(' + imagePosition.x + 'px, ' + imagePosition.y + 'px) scale(' + currentZoom + ')';
+                modalImg.style.transition = 'transform 0.2s';
+            }
+        }
+
+        function downloadImage() {
+            const modalImg = document.getElementById('modalImg');
+            if (modalImg) {
+                const originalUrl = modalImg.getAttribute('data-original-url');
+                if (originalUrl) {
+                    window.open(originalUrl, '_blank');
+                }
+            }
+        }
+
+        function startDrag(e) {
+            isDragging = true;
+            dragStart.x = e.clientX - imagePosition.x;
+            dragStart.y = e.clientY - imagePosition.y;
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            imagePosition.x = e.clientX - dragStart.x;
+            imagePosition.y = e.clientY - dragStart.y;
+            updateImageTransform();
+        }
+
+        function stopDrag() {
+            isDragging = false;
+        }
+
+        function handleWheel(e) {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? 0.9 : 1.1;
+            currentZoom = Math.max(0.5, Math.min(5, currentZoom * delta));
+            updateImageTransform();
+        }
+
+        // Keyboard navigation for image modal (Arrow keys)
+        document.addEventListener('keydown', function(e) {
+            const modal = document.getElementById('imgModal');
+            if (modal && modal.style.display === 'flex') {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    showPrevImage();
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    showNextImage();
+                }
+            }
+        });
+
+        /* SHOW IMAGES FROM ROW */
+        function showImagesFromRow(rowNum, rowIdx, imgUrls, e) {
+            // Stop event propagation to prevent row click
+            if (e) {
+                e.stopPropagation();
+            }
+
+            if (!imgUrls || imgUrls.length === 0) {
+                // No images, show note detail modal instead
+                showNoteDetailModal(rowNum, rowIdx, null);
+                return;
+            }
+
+            // Show first image in modal
+            const firstUrl = imgUrls[0];
+            const thumbnailUrl = convertDriveUrl(firstUrl);
+            showImageModal(firstUrl, thumbnailUrl, rowNum, 'img', 0, imgUrls);
+        }
+
+        /* HANDLE IMAGE CLICK - Helper function to avoid JSON escaping issues */
+        function handleImageClick(imgElement) {
+            try {
+                const imgUrlsJson = imgElement.getAttribute('data-img-urls');
+                if (!imgUrlsJson) {
+                    console.error('No image URLs found');
+                    return;
+                }
+
+                const imgUrls = JSON.parse(imgUrlsJson);
+                const rowNum = parseInt(imgElement.getAttribute('data-row-num')) || null;
+                const colName = imgElement.getAttribute('data-col-name') || 'img';
+                const imgIndex = parseInt(imgElement.getAttribute('data-img-index')) || 0;
+                const thumbnailUrl = imgElement.getAttribute('data-thumbnail') || convertDriveUrl(imgUrls[imgIndex] || imgUrls[0]);
+                const originalUrl = imgUrls[imgIndex] || imgUrls[0];
+
+                if (imgUrls && imgUrls.length > 0) {
+                    showImageModal(originalUrl, thumbnailUrl, rowNum, colName, imgIndex, imgUrls);
+                }
+            } catch (error) {
+                console.error('Error handling image click:', error);
+                alert('Lỗi khi mở ảnh: ' + error.message);
+            }
+        }
+
+        /* INLINE ROW EDITING */
+        let editingRowNum = null;
+        let editingRowData = null;
+
+        function enableRowEdit(rowNum, rowIdx) {
+            // Stop if already editing another row
+            if (editingRowNum !== null && editingRowNum !== rowNum) {
+                if (!confirm('Bạn đang chỉnh sửa dòng khác. Hủy chỉnh sửa và chuyển sang dòng này?')) {
+                    return;
+                }
+                cancelRowEdit();
+            }
+
+            if (editingRowNum === rowNum) {
+                // Already editing this row, save it
+                saveRowEdit(rowNum);
+                return;
+            }
+
+            // Get row data
+            if (!currentNoteRows || !currentNoteRows[rowIdx]) {
+                alert('Không tìm thấy dữ liệu dòng');
+                return;
+            }
+
+            editingRowNum = rowNum;
+            editingRowData = currentNoteRows[rowIdx];
+
+            // Find all cells in this row and make them editable
+            const row = document.querySelector(`tr[onclick*="${rowNum}"]`);
+            if (!row) return;
+
+            // Hide time and user column headers when editing
+            const table = row.closest('table');
+            if (table) {
+                const headerRow = table.querySelector('thead tr');
+                if (headerRow) {
+                    const headers = headerRow.querySelectorAll('th');
+                    headers.forEach((th, idx) => {
+                        const headerText = th.textContent.trim().toLowerCase();
+                        if (headerText === 'time' || headerText === 'user') {
+                            th.style.display = 'none';
+                        }
+                    });
+                }
+            }
+
+            const cells = row.querySelectorAll('td[data-row-num="' + rowNum + '"]');
+            cells.forEach(cell => {
+                const colName = cell.getAttribute('data-col-name');
+                if (!colName || colName === '_rowNum') return;
+
+                const colLower = colName.toLowerCase();
+
+                // Hide time and user columns when editing
+                if (colLower === 'time' || colLower === 'user') {
+                    cell.style.display = 'none';
+                    return;
+                }
+
+                // Handle img column specially - add edit controls
+                if (colLower === 'img' || colLower.includes('img')) {
+                    cell.classList.add('editing-cell');
+                    enableImgCellEdit(cell, rowNum, colName);
+                    return;
+                }
+
+                // Handle file column specially - add edit controls
+                if (colLower === 'file' || colLower.includes('file')) {
+                    cell.classList.add('editing-cell');
+                    enableFileCellEdit(cell, rowNum, colName);
+                    return;
+                }
+
+                const originalValue = cell.getAttribute('data-original-value') || cell.textContent;
+                const cellId = cell.id;
+
+                // Determine if this should be a textarea (for longer text fields)
+                const isTextareaField = colLower === 'chi_tiet' || colLower === 'huong_gq' || colLower === 'gop_y' ||
+                    colLower === 'chi tiết' || colLower === 'hướng gq' || colLower === 'góp ý' ||
+                    colLower.includes('chi_tiet') || colLower.includes('huong_gq') || colLower.includes('gop_y');
+
+                // Add editing class to cell for styling
+                cell.classList.add('editing-cell');
+
+                if (isTextareaField) {
+                    // Create textarea for longer text fields
+                    const textarea = document.createElement('textarea');
+                    textarea.value = originalValue;
+                    textarea.onblur = function() {
+                        // Don't auto-save on blur, user must click save button
+                    };
+                    textarea.onkeydown = function(e) {
+                        if (e.key === 'Escape') {
+                            e.preventDefault();
+                            cancelRowEdit();
+                        }
+                    };
+
+                    // Replace cell content with textarea
+                    cell.innerHTML = '';
+                    cell.appendChild(textarea);
+                    textarea.focus();
+                    textarea.select();
+                } else {
+                    // Create input field for shorter text fields
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.value = originalValue;
+                    input.onblur = function() {
+                        // Don't auto-save on blur, user must click save button
+                    };
+                    input.onkeydown = function(e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            input.blur();
+                        }
+                        if (e.key === 'Escape') {
+                            e.preventDefault();
+                            cancelRowEdit();
+                        }
+                    };
+
+                    // Replace cell content with input
+                    cell.innerHTML = '';
+                    cell.appendChild(input);
+                    input.focus();
+                    input.select();
+                }
+            });
+
+            // Change edit button to save button and add cancel button
+            const editBtn = row.querySelector('.btn-edit');
+            const deleteBtn = row.querySelector('.btn-delete');
+            const actionButtonsCell = row.querySelector('.action-buttons');
+
+            if (editBtn) {
+                editBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+          <polyline points="17 21 17 13 7 13 7 21"></polyline>
+          <polyline points="7 3 7 8 15 8"></polyline>
+        </svg> Lưu`;
+                editBtn.onclick = function(e) {
+                    e.stopPropagation();
+                    saveRowEdit(rowNum);
+                };
+            }
+
+            // Add cancel button
+            if (actionButtonsCell && !actionButtonsCell.querySelector('.btn-cancel')) {
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = 'action-btn btn-cancel';
+                cancelBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg> Hủy`;
+                cancelBtn.onclick = function(e) {
+                    e.stopPropagation();
+                    cancelRowEdit();
+                };
+                actionButtonsCell.insertBefore(cancelBtn, editBtn ? editBtn.nextSibling : null);
+            }
+        }
+
+        function enableImgCellEdit(cell, rowNum, colName) {
+            // Get current image URLs from data attribute (check both cell and existing container)
+            let imgUrlsJson = cell.getAttribute('data-img-urls');
+            if (!imgUrlsJson) {
+                const existingContainer = cell.querySelector('div[data-img-urls]');
+                if (existingContainer) {
+                    imgUrlsJson = existingContainer.getAttribute('data-img-urls');
+                }
+            }
+            imgUrlsJson = imgUrlsJson || '[]';
+            let imgUrls = [];
+            try {
+                imgUrls = JSON.parse(imgUrlsJson);
+            } catch (e) {
+                imgUrls = [];
+            }
+
+            // Create container for images with edit controls
+            const container = document.createElement('div');
+            container.style.cssText = 'display:flex; flex-wrap:wrap; gap:8px; align-items:flex-start;';
+            container.setAttribute('data-img-urls', imgUrlsJson);
+            container.setAttribute('data-row-num', rowNum);
+            container.setAttribute('data-col-name', colName);
+
+            // Update cell data attributes to keep in sync
+            cell.setAttribute('data-img-urls', imgUrlsJson);
+            cell.setAttribute('data-row-num', rowNum);
+            cell.setAttribute('data-col-name', colName);
+
+            // Render existing images with delete buttons
+            imgUrls.forEach((url, idx) => {
+                if (!url || !url.trim()) return;
+                const thumbnailUrl = convertDriveUrl(url);
+                const imgContainer = document.createElement('div');
+                imgContainer.style.cssText = 'position:relative; display:inline-block;';
+
+                const img = document.createElement('img');
+                img.src = thumbnailUrl;
+                img.style.cssText = 'width:80px; height:80px; object-fit:cover; border-radius:6px; border:2px solid #e0e0e0; cursor:pointer;';
+                img.onerror = function() {
+                    img.style.display = 'none';
+                    const errorDiv = document.createElement('div');
+                    errorDiv.style.cssText = 'width:80px; height:80px; background:#f5f5f5; border-radius:6px; border:2px solid #e0e0e0; display:flex; align-items:center; justify-content:center; font-size:12px; color:#999;';
+                    errorDiv.textContent = 'Lỗi';
+                    imgContainer.appendChild(errorDiv);
+                };
+
+                // Delete button (X) at top-right corner
+                const deleteBtn = document.createElement('button');
+                deleteBtn.innerHTML = '×';
+                deleteBtn.style.cssText = 'position:absolute; top:-8px; right:-8px; width:24px; height:24px; background:#f44336; color:white; border:none; border-radius:50%; cursor:pointer; font-size:18px; font-weight:bold; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 4px rgba(0,0,0,0.2); z-index:10;';
+                deleteBtn.onclick = function(e) {
+                    e.stopPropagation();
+                    removeImageFromEditCell(container, idx);
+                };
+
+                imgContainer.appendChild(img);
+                imgContainer.appendChild(deleteBtn);
+                container.appendChild(imgContainer);
+            });
+
+            // Add button (+) to add new image
+            const addBtn = document.createElement('button');
+            addBtn.innerHTML = '+';
+            addBtn.style.cssText = 'width:80px; height:80px; background:#f5f5f5; border:2px dashed #ccc; border-radius:6px; cursor:pointer; font-size:32px; color:#666; display:flex; align-items:center; justify-content:center; transition:all 0.3s;';
+            addBtn.onmouseover = function() {
+                this.style.background = '#e3f2fd';
+                this.style.borderColor = '#1976d2';
+                this.style.color = '#1976d2';
+            };
+            addBtn.onmouseout = function() {
+                this.style.background = '#f5f5f5';
+                this.style.borderColor = '#ccc';
+                this.style.color = '#666';
+            };
+            addBtn.onclick = function(e) {
+                e.stopPropagation();
+                addImageToEditCell(container);
+            };
+            addBtn.title = 'Thêm ảnh (hoặc Ctrl+V để dán)';
+            container.appendChild(addBtn);
+
+            // Enable paste (Ctrl+V) when clicking on container
+            container.setAttribute('tabindex', '0');
+            container.style.outline = 'none';
+            container.onclick = function(e) {
+                if (e.target === container || e.target === addBtn) {
+                    container.focus();
+                }
+            };
+            container.onpaste = function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                handleImagePasteInEditCell(e, container);
+            };
+            container.onkeydown = function(e) {
+                if (e.key === 'v' && (e.ctrlKey || e.metaKey)) {
+                    container.focus();
+                }
+            };
+
+            // Replace cell content
+            cell.innerHTML = '';
+            cell.appendChild(container);
+        }
+
+        function removeImageFromEditCell(container, index) {
+            const imgUrlsJson = container.getAttribute('data-img-urls') || '[]';
+            let imgUrls = [];
+            try {
+                imgUrls = JSON.parse(imgUrlsJson);
+            } catch (e) {
+                imgUrls = [];
+            }
+
+            if (index >= 0 && index < imgUrls.length) {
+                imgUrls.splice(index, 1);
+
+                // Get cell and row info before removing
+                const rowNum = container.getAttribute('data-row-num');
+                const colName = container.getAttribute('data-col-name');
+                const cell = container.closest('td');
+
+                if (cell) {
+                    // Update data attribute on cell directly
+                    cell.setAttribute('data-img-urls', JSON.stringify(imgUrls));
+                    // Re-render
+                    enableImgCellEdit(cell, rowNum, colName);
+                }
+            }
+        }
+
+        function addImageToEditCell(container) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.multiple = true;
+            input.style.display = 'none';
+            input.onchange = function(e) {
+                const files = Array.from(e.target.files);
+                if (files.length > 0) {
+                    handleImageFilesForEditCell(files, container);
+                }
+                input.remove();
+            };
+            document.body.appendChild(input);
+            input.click();
+        }
+
+        function handleImagePasteInEditCell(e, container) {
+            const items = e.clipboardData.items;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    const blob = items[i].getAsFile();
+                    handleImageFilesForEditCell([blob], container);
+                    break;
+                }
+            }
+        }
+
+        function handleImageFilesForEditCell(files, container) {
+            files.forEach(file => {
+                if (!file.type.match('image.*')) {
+                    alert('Vui lòng chọn file hình ảnh');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Data = e.target.result;
+                    // Upload image
+                    const base64Only = base64Data.split(',')[1];
+                    const mimeType = base64Data.match(/data:([^;]+);/)[1];
+
+                    google.script.run
+                        .withSuccessHandler(function(result) {
+                            if (result && result.url) {
+                                // Add to imgUrls
+                                let imgUrlsJson = container.getAttribute('data-img-urls') || '[]';
+                                let imgUrls = [];
+                                try {
+                                    imgUrls = JSON.parse(imgUrlsJson);
+                                } catch (e) {
+                                    imgUrls = [];
+                                }
+                                imgUrls.push(result.url);
+                                imgUrlsJson = JSON.stringify(imgUrls);
+                                container.setAttribute('data-img-urls', imgUrlsJson);
+
+                                // Re-render
+                                const rowNum = container.getAttribute('data-row-num');
+                                const colName = container.getAttribute('data-col-name');
+                                const cell = container.closest('td');
+                                if (cell) {
+                                    // Update cell data attribute
+                                    cell.setAttribute('data-img-urls', imgUrlsJson);
+                                    enableImgCellEdit(cell, rowNum, colName);
+                                }
+                            } else {
+                                alert('Lỗi khi upload ảnh');
+                            }
+                        })
+                        .withFailureHandler(function(error) {
+                            alert('Lỗi: ' + error.toString());
+                        })
+                        .uploadImageFromBase64(base64Only, mimeType);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function enableFileCellEdit(cell, rowNum, colName) {
+            // Get current file URLs and file infos from data attribute
+            let fileUrlsJson = cell.getAttribute('data-file-urls');
+            let fileInfosJson = cell.getAttribute('data-file-infos');
+            if (!fileUrlsJson) {
+                const existingContainer = cell.querySelector('div[data-file-urls]');
+                if (existingContainer) {
+                    fileUrlsJson = existingContainer.getAttribute('data-file-urls');
+                    fileInfosJson = existingContainer.getAttribute('data-file-infos');
+                }
+            }
+            fileUrlsJson = fileUrlsJson || '[]';
+            fileInfosJson = fileInfosJson || '[]';
+            let fileUrls = [];
+            let fileInfos = [];
+            try {
+                fileUrls = JSON.parse(fileUrlsJson);
+                fileInfos = JSON.parse(fileInfosJson);
+            } catch (e) {
+                fileUrls = [];
+                fileInfos = [];
+            }
+
+            // Create container for files with edit controls
+            const container = document.createElement('div');
+            container.style.cssText = 'display:flex; flex-wrap:wrap; gap:8px; align-items:flex-start;';
+            container.setAttribute('data-file-urls', fileUrlsJson);
+            container.setAttribute('data-file-infos', fileInfosJson);
+            container.setAttribute('data-row-num', rowNum);
+            container.setAttribute('data-col-name', colName);
+
+            // Render existing files with delete buttons (only non-image files)
+            fileUrls.forEach((url, idx) => {
+                if (!url || !url.trim()) return;
+
+                // Skip image files - they should be in img column
+                const isImage = url.match(/\.(jpg|jpeg|png|gif|webp|bmp)(\?|$)/i);
+                if (isImage) {
+                    return; // Skip image files in file column
+                }
+
+                // Get actual fileName from fileInfos if available, otherwise use getFileNameFromUrl
+                let fileName = null;
+                if (fileInfos && fileInfos.length > idx && fileInfos[idx] && fileInfos[idx].fileName) {
+                    fileName = fileInfos[idx].fileName;
+                } else {
+                    // Try to get from Drive URL
+                    fileName = getFileNameFromDriveUrl(url);
+                }
+                if (!fileName) {
+                    fileName = getFileNameFromUrl(url);
+                }
+
+                const fileContainer = document.createElement('div');
+                fileContainer.style.cssText = 'position:relative; display:inline-block;';
+
+                // Show file link button with actual fileName
+                const fileLink = document.createElement('a');
+                fileLink.href = url;
+                fileLink.target = '_blank';
+                fileLink.rel = 'noopener';
+                fileLink.style.cssText = 'display:inline-flex; align-items:center; gap:6px; padding:8px 12px; background:#1976d2; color:white; border-radius:6px; text-decoration:none; font-size:12px; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;';
+                fileLink.title = fileName || 'Tải về';
+
+                // Add SVG icon
+                const iconSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                iconSvg.setAttribute('width', '16');
+                iconSvg.setAttribute('height', '16');
+                iconSvg.setAttribute('viewBox', '0 0 24 24');
+                iconSvg.setAttribute('fill', 'none');
+                iconSvg.setAttribute('stroke', 'currentColor');
+                iconSvg.setAttribute('stroke-width', '2');
+                iconSvg.setAttribute('stroke-linecap', 'round');
+                iconSvg.setAttribute('stroke-linejoin', 'round');
+                iconSvg.style.cssText = 'flex-shrink:0;';
+
+                const path1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path1.setAttribute('d', 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z');
+                iconSvg.appendChild(path1);
+
+                const polyline1 = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+                polyline1.setAttribute('points', '14 2 14 8 20 8');
+                iconSvg.appendChild(polyline1);
+
+                const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line1.setAttribute('x1', '16');
+                line1.setAttribute('y1', '13');
+                line1.setAttribute('x2', '8');
+                line1.setAttribute('y2', '13');
+                iconSvg.appendChild(line1);
+
+                const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line2.setAttribute('x1', '16');
+                line2.setAttribute('y1', '17');
+                line2.setAttribute('x2', '8');
+                line2.setAttribute('y2', '17');
+                iconSvg.appendChild(line2);
+
+                const polyline2 = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+                polyline2.setAttribute('points', '10 9 9 9 8 9');
+                iconSvg.appendChild(polyline2);
+
+                fileLink.appendChild(iconSvg);
+                fileLink.appendChild(document.createTextNode(fileName || 'Tải về'));
+                fileContainer.appendChild(fileLink);
+
+                // Delete button (X) at top-right corner
+                const deleteBtn = document.createElement('button');
+                deleteBtn.innerHTML = '×';
+                deleteBtn.style.cssText = 'position:absolute; top:-8px; right:-8px; width:24px; height:24px; background:#f44336; color:white; border:none; border-radius:50%; cursor:pointer; font-size:18px; font-weight:bold; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 4px rgba(0,0,0,0.2); z-index:10;';
+                deleteBtn.onclick = function(e) {
+                    e.stopPropagation();
+                    removeFileFromEditCell(container, idx);
+                };
+
+                fileContainer.appendChild(deleteBtn);
+                container.appendChild(fileContainer);
+            });
+
+            // Add button (+) to add new file
+            const addBtn = document.createElement('button');
+            addBtn.innerHTML = '+';
+            addBtn.style.cssText = 'width:80px; height:80px; background:#f5f5f5; border:2px dashed #ccc; border-radius:6px; cursor:pointer; font-size:32px; color:#666; display:flex; align-items:center; justify-content:center; transition:all 0.3s;';
+            addBtn.onmouseover = function() {
+                this.style.background = '#e3f2fd';
+                this.style.borderColor = '#1976d2';
+                this.style.color = '#1976d2';
+            };
+            addBtn.onmouseout = function() {
+                this.style.background = '#f5f5f5';
+                this.style.borderColor = '#ccc';
+                this.style.color = '#666';
+            };
+            addBtn.onclick = function(e) {
+                e.stopPropagation();
+                addFileToEditCell(container);
+            };
+            addBtn.title = 'Thêm file';
+            container.appendChild(addBtn);
+
+            // Replace cell content
+            cell.innerHTML = '';
+            cell.appendChild(container);
+        }
+
+        function removeFileFromEditCell(container, index) {
+            const fileUrlsJson = container.getAttribute('data-file-urls') || '[]';
+            const fileInfosJson = container.getAttribute('data-file-infos') || '[]';
+            let fileUrls = [];
+            let fileInfos = [];
+            try {
+                fileUrls = JSON.parse(fileUrlsJson);
+                fileInfos = JSON.parse(fileInfosJson);
+            } catch (e) {
+                fileUrls = [];
+                fileInfos = [];
+            }
+
+            if (index >= 0 && index < fileUrls.length) {
+                fileUrls.splice(index, 1);
+                if (index < fileInfos.length) {
+                    fileInfos.splice(index, 1);
+                }
+
+                // Get cell and row info before removing
+                const rowNum = container.getAttribute('data-row-num');
+                const colName = container.getAttribute('data-col-name');
+                const cell = container.closest('td');
+
+                if (cell) {
+                    // Update data attributes on cell directly
+                    cell.setAttribute('data-file-urls', JSON.stringify(fileUrls));
+                    cell.setAttribute('data-file-infos', JSON.stringify(fileInfos));
+                    // Re-render
+                    enableFileCellEdit(cell, rowNum, colName);
+                }
+            }
+        }
+
+        function addFileToEditCell(container) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.multiple = true;
+            input.accept = '*/*'; // Accept all file types
+            input.style.display = 'none';
+            input.onchange = function(e) {
+                const files = Array.from(e.target.files);
+                // Filter out image files
+                const nonImageFiles = files.filter(file => !file.type.match('image.*'));
+                if (nonImageFiles.length === 0 && files.length > 0) {
+                    alert('Vui lòng chọn file không phải ảnh. Ảnh nên được thêm vào cột hình ảnh.');
+                    input.remove();
+                    return;
+                }
+                if (nonImageFiles.length > 0) {
+                    handleFilesForEditCell(nonImageFiles, container);
+                }
+                input.remove();
+            };
+            document.body.appendChild(input);
+            input.click();
+        }
+
+        function handleFilesForEditCell(files, container) {
+            files.forEach(file => {
+                // Check if it's an image file
+                if (file.type.match('image.*')) {
+                    alert('File này là ảnh. Vui lòng thêm ảnh vào cột hình ảnh.');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Data = e.target.result;
+                    // Upload file
+                    const fileData = {
+                        base64: base64Data,
+                        mimeType: file.type,
+                        fileName: file.name || 'file'
+                    };
+
+                    google.script.run
+                        .withSuccessHandler(function(result) {
+                            if (result && result.url) {
+                                // Store file info with URL and actual fileName from Drive
+                                let fileInfosJson = container.getAttribute('data-file-infos') || '[]';
+                                let fileInfos = [];
+                                try {
+                                    fileInfos = JSON.parse(fileInfosJson);
+                                } catch (e) {
+                                    fileInfos = [];
+                                }
+
+                                // Store both URL and actual fileName from Drive
+                                fileInfos.push({
+                                    url: result.url,
+                                    fileName: result.fileName || file.name || 'file'
+                                });
+
+                                // Also maintain fileUrls for backward compatibility
+                                let fileUrlsJson = container.getAttribute('data-file-urls') || '[]';
+                                let fileUrls = [];
+                                try {
+                                    fileUrls = JSON.parse(fileUrlsJson);
+                                } catch (e) {
+                                    fileUrls = [];
+                                }
+                                fileUrls.push(result.url);
+
+                                container.setAttribute('data-file-urls', JSON.stringify(fileUrls));
+                                container.setAttribute('data-file-infos', JSON.stringify(fileInfos));
+
+                                // Re-render
+                                const rowNum = container.getAttribute('data-row-num');
+                                const colName = container.getAttribute('data-col-name');
+                                const cell = container.closest('td');
+                                if (cell) {
+                                    // Update cell data attributes
+                                    cell.setAttribute('data-file-urls', JSON.stringify(fileUrls));
+                                    cell.setAttribute('data-file-infos', JSON.stringify(fileInfos));
+                                    enableFileCellEdit(cell, rowNum, colName);
+                                }
+                            } else {
+                                alert('Lỗi khi upload file');
+                            }
+                        })
+                        .withFailureHandler(function(error) {
+                            alert('Lỗi: ' + error.toString());
+                        })
+                        .uploadFile(fileData);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function saveRowEdit(rowNum) {
+            if (editingRowNum !== rowNum) return;
+
+            const row = document.querySelector(`tr[onclick*="${rowNum}"]`);
+            if (!row) return;
+
+            // Collect edited values
+            const editedData = {};
+            const cells = row.querySelectorAll('td[data-row-num="' + rowNum + '"]');
+            cells.forEach(cell => {
+                const colName = cell.getAttribute('data-col-name');
+                if (!colName) return;
+
+                // Get value from input or textarea
+                const input = cell.querySelector('input');
+                const textarea = cell.querySelector('textarea');
+                if (input) {
+                    editedData[colName] = input.value;
+                } else if (textarea) {
+                    editedData[colName] = textarea.value;
+                }
+
+                // Handle img cell - get imgUrls from container or cell data attribute
+                const colLower = colName ? colName.toLowerCase() : '';
+                if (colLower === 'img' || colLower.includes('img')) {
+                    let imgUrlsJson = cell.getAttribute('data-img-urls');
+                    if (!imgUrlsJson) {
+                        const container = cell.querySelector('div[data-img-urls]');
+                        if (container) {
+                            imgUrlsJson = container.getAttribute('data-img-urls');
+                        }
+                    }
+                    imgUrlsJson = imgUrlsJson || '[]';
+                    let imgUrls = [];
+                    try {
+                        imgUrls = JSON.parse(imgUrlsJson);
+                    } catch (e) {
+                        imgUrls = [];
+                    }
+                    editedData[colName] = imgUrls.join(',\n');
+                }
+
+                // Handle file cell - get fileUrls from container or cell data attribute
+                if (colLower === 'file' || colLower.includes('file')) {
+                    let fileUrlsJson = cell.getAttribute('data-file-urls');
+                    if (!fileUrlsJson) {
+                        const container = cell.querySelector('div[data-file-urls]');
+                        if (container) {
+                            fileUrlsJson = container.getAttribute('data-file-urls');
+                        }
+                    }
+                    fileUrlsJson = fileUrlsJson || '[]';
+                    let fileUrls = [];
+                    try {
+                        fileUrls = JSON.parse(fileUrlsJson);
+                    } catch (e) {
+                        fileUrls = [];
+                    }
+                    editedData[colName] = fileUrls.join(',\n');
+                }
+            });
+
+            // Get original note data
+            if (!editingRowData) {
+                alert('Không tìm thấy dữ liệu gốc');
+                cancelRowEdit();
+                return;
+            }
+
+            // Merge edited data with original
+            // Find file and img column names from headers
+            let fileColName = null;
+            let imgColName = null;
+            if (currentNoteHeaders) {
+                currentNoteHeaders.forEach(h => {
+                    const hLower = String(h).toLowerCase();
+                    if ((hLower === 'file' || hLower.includes('file')) && !hLower.includes('img')) {
+                        fileColName = h;
+                    }
+                    if (hLower === 'img' || hLower.includes('img')) {
+                        imgColName = h;
+                    }
+                });
+            }
+
+            // Helper function to get value - try multiple column name variations
+            const getValue = (possibleColNames) => {
+                // First try editedData (user's changes) with all possible column names
+                for (let colName of possibleColNames) {
+                    if (editedData[colName] !== undefined && editedData[colName] !== '') {
+                        return editedData[colName];
+                    }
+                }
+                // Then try original data with all possible column names
+                for (let colName of possibleColNames) {
+                    if (editingRowData[colName] !== undefined && editingRowData[colName] !== '') {
+                        return editingRowData[colName];
+                    }
+                }
+                return '';
+            };
+
+            // Find column names from headers and create list of possible variations
+            let linhVucCols = [];
+            let diaBanCols = [];
+            let tieuDeCols = [];
+            let chiTietCols = [];
+            let huongGQCols = [];
+            let gopYCols = [];
+
+            if (currentNoteHeaders) {
+                currentNoteHeaders.forEach(h => {
+                    const hLower = String(h).toLowerCase();
+                    if (hLower.includes('lĩnh vực') || hLower.includes('linh vuc')) {
+                        linhVucCols.push(h);
+                        // Also add underscore version
+                        if (!linhVucCols.includes('linh_vuc')) linhVucCols.push('linh_vuc');
+                        if (!linhVucCols.includes('Linh_vuc')) linhVucCols.push('Linh_vuc');
+                    }
+                    if (hLower.includes('địa bàn') || hLower.includes('dia ban')) {
+                        diaBanCols.push(h);
+                        if (!diaBanCols.includes('dia_ban')) diaBanCols.push('dia_ban');
+                        if (!diaBanCols.includes('Dia_ban')) diaBanCols.push('Dia_ban');
+                    }
+                    if (hLower.includes('tiêu đề') || hLower.includes('tieu de')) {
+                        tieuDeCols.push(h);
+                        if (!tieuDeCols.includes('tieu_de')) tieuDeCols.push('tieu_de');
+                        if (!tieuDeCols.includes('Tieu_de')) tieuDeCols.push('Tieu_de');
+                    }
+                    if (hLower.includes('chi tiết') || hLower.includes('chi tiet')) {
+                        chiTietCols.push(h);
+                        if (!chiTietCols.includes('chi_tiet')) chiTietCols.push('chi_tiet');
+                        if (!chiTietCols.includes('Chi_tiet')) chiTietCols.push('Chi_tiet');
+                    }
+                    if ((hLower.includes('hướng') && hLower.includes('gq')) || hLower.includes('huong gq')) {
+                        huongGQCols.push(h);
+                        if (!huongGQCols.includes('huong_gq')) huongGQCols.push('huong_gq');
+                        if (!huongGQCols.includes('Huong_gq')) huongGQCols.push('Huong_gq');
+                    }
+                    if (hLower.includes('góp ý') || hLower.includes('gop y')) {
+                        gopYCols.push(h);
+                        if (!gopYCols.includes('gop_y')) gopYCols.push('gop_y');
+                        if (!gopYCols.includes('Gop_y')) gopYCols.push('Gop_y');
+                    }
+                });
+            }
+
+            // Also add common underscore variations if not found (prioritize exact matches from editedData)
+            // From console log, editedData uses: Linh_vuc, dia_ban, tieu_de, chi_tiet, huong_gq, gop_y
+            if (linhVucCols.length === 0) linhVucCols = ['Linh_vuc', 'linh_vuc', 'Lĩnh vực', 'Linh vuc'];
+            if (diaBanCols.length === 0) diaBanCols = ['dia_ban', 'Dia_ban', 'Địa bàn', 'Dia ban'];
+            if (tieuDeCols.length === 0) tieuDeCols = ['tieu_de', 'Tieu_de', 'Tiêu đề', 'Tieu de'];
+            if (chiTietCols.length === 0) chiTietCols = ['chi_tiet', 'Chi_tiet', 'Chi tiết', 'Chi tiet'];
+            if (huongGQCols.length === 0) huongGQCols = ['huong_gq', 'Huong_gq', 'Hướng GQ', 'Huong GQ'];
+            if (gopYCols.length === 0) gopYCols = ['gop_y', 'Gop_y', 'Góp ý', 'Gop y'];
+
+            const note = {
+                linhVuc: getValue(linhVucCols),
+                diaBan: getValue(diaBanCols),
+                tieuDe: getValue(tieuDeCols),
+                chiTiet: getValue(chiTietCols),
+                huongGQ: getValue(huongGQCols),
+                gopY: getValue(gopYCols),
+                fileUrl: fileColName ? getValue([fileColName, 'file', 'File']) : '',
+                imgUrls: imgColName ? getValue([imgColName, 'img', 'Img']) : ''
+            };
+
+            // Debug: log the data being sent
+            console.log('Saving note:', note);
+            console.log('Edited data:', editedData);
+            console.log('Original data:', editingRowData);
+
+            // Save to server
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    console.log('Save result:', result);
+                    if (result && result.success === false) {
+                        alert('Lỗi khi cập nhật: ' + (result.error || 'Unknown error'));
+                    } else {
+                        alert('Đã cập nhật thành công!');
+                        cancelRowEdit();
+                        loadNotes(currentPage);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    console.error('Save error:', error);
+                    alert('Lỗi khi cập nhật: ' + error.toString());
+                })
+                .updateNote(parseInt(rowNum), note, CURRENT_USER);
+        }
+
+        function cancelRowEdit() {
+            if (editingRowNum === null) return;
+
+            const row = document.querySelector(`tr[onclick*="${editingRowNum}"]`);
+            if (!row) {
+                editingRowNum = null;
+                editingRowData = null;
+                return;
+            }
+
+            // Restore time and user column headers visibility
+            const table = row.closest('table');
+            if (table) {
+                const headerRow = table.querySelector('thead tr');
+                if (headerRow) {
+                    const headers = headerRow.querySelectorAll('th');
+                    headers.forEach((th) => {
+                        const headerText = th.textContent.trim().toLowerCase();
+                        if (headerText === 'time' || headerText === 'user') {
+                            th.style.display = '';
+                        }
+                    });
+                }
+            }
+
+            // Restore action buttons
+            const actionButtonsCell = row.querySelector('.action-buttons');
+            if (actionButtonsCell) {
+                const editBtn = actionButtonsCell.querySelector('.btn-edit');
+                const cancelBtn = actionButtonsCell.querySelector('.btn-cancel');
+
+                if (editBtn) {
+                    editBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg> Sửa`;
+                    editBtn.onclick = function(e) {
+                        e.stopPropagation();
+                        const rowIdx = getRowIndexByRowNum(editingRowNum);
+                        enableRowEdit(editingRowNum, rowIdx);
+                    };
+                }
+
+                if (cancelBtn) {
+                    cancelBtn.remove();
+                }
+            }
+
+            // Restore cells to original state without reloading the entire list
+            // Get original row data from editingRowData
+            if (editingRowData && currentNoteHeaders) {
+                const cells = row.querySelectorAll('td[data-row-num="' + editingRowNum + '"]');
+                cells.forEach(cell => {
+                    const colName = cell.getAttribute('data-col-name');
+                    if (!colName || colName === '_rowNum') return;
+
+                    const colLower = colName.toLowerCase();
+                    const originalValue = editingRowData[colName] || '';
+
+                    // Remove editing class
+                    cell.classList.remove('editing-cell');
+
+                    // Restore text cells
+                    if (colLower !== 'img' && colLower !== 'file' && !colLower.includes('img') && !colLower.includes('file')) {
+                        const displayText = String(originalValue).length > 100 ? String(originalValue).substring(0, 100) + '...' : String(originalValue);
+                        cell.innerHTML = escapeHtml(displayText);
+                        cell.setAttribute('data-original-value', String(originalValue));
+                        cell.setAttribute('title', escapeHtml(String(originalValue)));
+                    }
+                    // For img and file cells, we need to restore from original data
+                    // This requires re-rendering the cell from original data
+                    // For now, we'll just reload to ensure correctness
+                });
+            }
+
+            // Restore img and file cells from original data
+            if (editingRowData && currentNoteHeaders) {
+                const cells = row.querySelectorAll('td[data-row-num="' + editingRowNum + '"]');
+                cells.forEach(cell => {
+                    const colName = cell.getAttribute('data-col-name');
+                    if (!colName || colName === '_rowNum') return;
+
+                    const colLower = colName.toLowerCase();
+
+                    // Remove editing class
+                    cell.classList.remove('editing-cell');
+
+                    // Restore img cell
+                    if (colLower === 'img' || colLower.includes('img')) {
+                        const imgUrls = String(editingRowData[colName] || '').split(/[,\n]/).filter(url => url.trim());
+                        const imgUrlsJson = JSON.stringify(imgUrls);
+                        cell.setAttribute('data-img-urls', imgUrlsJson);
+                        // Re-render img cell (simplified - just show first image)
+                        if (imgUrls.length > 0) {
+                            const firstUrl = imgUrls[0].trim();
+                            const thumbnailUrl = convertDriveUrl(firstUrl);
+                            const fileName = getFileNameFromUrl(firstUrl);
+                            const uniqueId = 'img_' + editingRowNum + '_0';
+                            const remainingCount = imgUrls.length - 1;
+                            let html = `<div style="position:relative; display:inline-block; margin:2px;">`;
+                            html += `<img id="${uniqueId}" src="${escapeHtml(thumbnailUrl)}" alt="${escapeHtml(fileName)}" class="img-thumbnail" 
+                                 data-img-urls="${escapeHtml(imgUrlsJson)}" data-row-num="${editingRowNum}" data-col-name="${escapeHtml(colName)}" data-img-index="0" data-thumbnail="${escapeHtml(thumbnailUrl)}"
+                                 onclick="event.stopPropagation(); event.cancelBubble=true; handleImageClick(this);" 
+                                 onerror="handleImageError(this, '${escapeHtml(firstUrl)}', '${escapeHtml(fileName)}')"
+                                 style="margin:2px; cursor:pointer;" title="Click để xem ảnh">`;
+                            if (remainingCount > 0) {
+                                html += `<span style="position:absolute; bottom:4px; right:4px; background:rgba(0,0,0,0.5); color:white; padding:4px 8px; border-radius:12px; font-size:14px; font-weight:bold; pointer-events:none; backdrop-filter:blur(4px);">+${remainingCount}</span>`;
+                            }
+                            html += `</div>`;
+                            cell.innerHTML = html;
+                        } else {
+                            cell.innerHTML = '';
+                        }
+                    }
+
+                    // Restore file cell
+                    if ((colLower === 'file' || colLower.includes('file')) && !colLower.includes('img')) {
+                        const fileUrls = String(editingRowData[colName] || '').split(/[,\n]/).filter(url => url.trim());
+                        const fileUrlsJson = JSON.stringify(fileUrls);
+                        cell.setAttribute('data-file-urls', fileUrlsJson);
+                        // Re-render file cell (simplified - just show links)
+                        let html = '';
+                        fileUrls.forEach((url, idx) => {
+                            if (!url || !url.trim()) return;
+                            const isImage = url.match(/\.(jpg|jpeg|png|gif|webp|bmp)(\?|$)/i);
+                            if (isImage) return; // Skip images in file column
+                            const fileName = getFileNameFromUrl(url);
+                            const safe = escapeHtml(url);
+                            html += `<a href="${safe}" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:6px; margin:2px; padding:8px 12px; background:#1976d2; color:white; border-radius:6px; text-decoration:none;" title="${escapeHtml(fileName)}">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                  <polyline points="14 2 14 8 20 8"></polyline>
+                                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                                  <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                                ${escapeHtml(fileName || 'Tải về')}
+                              </a>`;
+                        });
+                        cell.innerHTML = html;
+                    }
+                });
+            }
+
+            editingRowNum = null;
+            editingRowData = null;
+        }
+
+        function getRowIndexByRowNum(rowNum) {
+            if (!currentNoteRows) return 0;
+            for (let i = 0; i < currentNoteRows.length; i++) {
+                const rn = currentNoteRows[i]._rowNum || (i + 2);
+                if (rn === rowNum) return i;
+            }
+            return 0;
+        }
+
+        /* EDIT & DELETE */
+        function editNote(rowNum, rowIdx) {
+            google.script.run.withSuccessHandler(function(note) {
+                if (!note) {
+                    alert('Không tìm thấy note để sửa');
+                    return;
+                }
+
+                // Fill form with note data
+                document.getElementById('f_lv').value = note.linhVuc || '';
+                document.getElementById('f_db').value = note.diaBan || '';
+                document.getElementById('f_td').value = note.tieuDe || '';
+                document.getElementById('f_ct').value = note.chiTiet || '';
+                document.getElementById('f_hgq').value = note.huongGQ || '';
+                document.getElementById('f_gy').value = note.gopY || '';
+
+                // Clear existing previews first
+                clearFilePreview();
+                clearImagePreview();
+
+                // Store existing URLs for edit mode (to preserve them when saving)
+                let existingFileUrls = [];
+                let existingImageUrls = [];
+
+                // Show file preview if exists (for display and to preserve when saving)
+                if (note.fileUrl) {
+                    const fileUrls = note.fileUrl.split(/[,\n]/).filter(url => url.trim());
+                    existingFileUrls = fileUrls;
+                    const filePreviewList = document.getElementById('filePreviewList');
+                    fileUrls.forEach((url, idx) => {
+                        const previewItem = document.createElement('div');
+                        previewItem.style.cssText = 'position:relative; display:inline-block; margin:5px;';
+                        const fileName = getFileNameFromUrl(url);
+                        previewItem.innerHTML = `
+          <div style="width:100px; height:100px; background:#f5f5f5; border-radius:8px; border:2px solid #e0e0e0; display:flex; align-items:center; justify-content:center; flex-direction:column; padding:10px;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#666;">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <div style="font-size:10px; text-align:center; word-break:break-all; margin-top:4px;"><a href="${escapeHtml(url)}" target="_blank" style="text-decoration:none; color:#1976d2;">${escapeHtml(fileName)}</a></div>
+            <button onclick="removeExistingFile(${idx})" style="position:absolute; top:-5px; right:-5px; background:#f44336; color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer; font-size:14px;">×</button>
+          </div>
+        `;
+                        filePreviewList.appendChild(previewItem);
+                    });
+                    document.getElementById('filePreview').style.display = 'block';
+                }
+
+                // Show image preview if exists (for display and to preserve when saving)
+                if (note.imgUrls) {
+                    const imgUrls = note.imgUrls.split(/[,\n]/).filter(url => url.trim());
+                    existingImageUrls = imgUrls;
+                    const imagePreviewList = document.getElementById('imagePreviewList');
+                    imgUrls.forEach((url, idx) => {
+                        const previewItem = document.createElement('div');
+                        previewItem.style.cssText = 'position:relative; display:inline-block; margin:5px;';
+                        const thumbnailUrl = convertDriveUrl(url);
+                        previewItem.innerHTML = `
+          <img src="${escapeHtml(thumbnailUrl)}" alt="Preview" style="width:100px; height:100px; object-fit:cover; border-radius:8px; border:2px solid #e0e0e0;" onerror="this.style.display='none'">
+          <button onclick="removeExistingImage(${idx})" style="position:absolute; top:-5px; right:-5px; background:#f44336; color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer; font-size:14px;">×</button>
+        `;
+                        imagePreviewList.appendChild(previewItem);
+                    });
+                    document.getElementById('imagePreview').style.display = 'block';
+                }
+
+                // Store existing URLs in global variables for save function
+                window.existingFileUrlsForEdit = existingFileUrls;
+                window.existingImageUrlsForEdit = existingImageUrls;
+
+                // Update form title and buttons
+                document.getElementById('editNoteId').value = rowNum;
+                document.getElementById('formTitle').textContent = 'Sửa Note';
+                document.getElementById('saveBtn').textContent = 'Cập nhật';
+                document.getElementById('cancelBtn').style.display = 'inline-block';
+
+                // Scroll to form
+                document.querySelector('.form-container').scrollIntoView({
+                    behavior: 'smooth'
+                });
+            }).getNoteByRow(rowNum);
+        }
+
+        function deleteNote(rowNum) {
+            if (!confirm('Bạn có chắc chắn muốn xóa note này?')) {
+                return;
+            }
+
+            google.script.run.withSuccessHandler(function() {
+                alert('Đã xóa note!');
+                loadNotes();
+            }).deleteNoteByRow(rowNum);
+        }
+
+
+
+
+        /* LOGOUT */
+        function logout() {
+            localStorage.removeItem("spa_user");
+            location.reload();
+        }
+    </script>
+
+</body>
+
+</html>
